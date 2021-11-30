@@ -1,5 +1,5 @@
 plugins {
-    id 'java'
+    id 'war'
 }
 
 group 'org.example'
@@ -7,6 +7,7 @@ version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 dependencies {
@@ -40,7 +41,13 @@ dependencies {
     implementation group: 'jstl', name: 'jstl', version: '1.2'
 
     implementation group: 'org.thymeleaf', name: 'thymeleaf-spring5', version: '3.0.12.RELEASE'
+
+    implementation group: 'org.liquibase', name: 'liquibase-core', version: '4.6.1'
+
+
+//    compile('org.apache.tomcat.embed:tomcat-embed-jasper:8.5.73')
 }
+
 
 //test {
 //    useJUnitPlatform()
