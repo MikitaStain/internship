@@ -5,7 +5,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
+import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -20,7 +23,9 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @EqualsAndHashCode
 @ToString
-@Table(name = "positions")
+@Table(name = "positions", schema = "application")
+@Cacheable
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Position {
 
     @Id
@@ -30,4 +35,5 @@ public class Position {
 
     @Column(name = "name")
     private String name;
+
 }

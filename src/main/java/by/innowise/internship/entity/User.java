@@ -1,25 +1,25 @@
 package by.innowise.internship.entity;
 
-import by.innowise.internship.entity.eRole.ERole;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
+import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-
-import java.util.Set;
+import java.util.List;
 
 @Entity
 @Getter
@@ -27,8 +27,10 @@ import java.util.Set;
 @NoArgsConstructor
 @EqualsAndHashCode
 @ToString
-@Table(name = "users")
-public class User {
+@Table(name = "users", schema = "application")
+@Cacheable
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+public class User implements Cloneable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,19 +49,17 @@ public class User {
     @Column(name = "last_name")
     private String lastName;
 
-    @Column(name = "role")
-    private ERole role;
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    private List<Email> emails;
 
-    @OneToMany
-    @JoinColumn(name = "user_id")
-    private Set<Email> emails;
-
-    @ManyToMany
-    @JoinTable(name = "user_courses",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "course_id")
-    )
-    private Set<Course> courses;
+//    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+//    @ManyToMany
+//    @JoinTable(name = "user_courses",
+//            joinColumns = @JoinColumn(name = "user_id"),
+//            inverseJoinColumns = @JoinColumn(name = "course_id")
+//    )
+//    private List<Course> courses;
 
     @ManyToOne
     @JoinColumn(name = "position_id")
