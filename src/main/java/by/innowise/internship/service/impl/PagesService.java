@@ -1,6 +1,5 @@
 package by.innowise.internship.service.impl;
 
-import by.innowise.internship.dto.PagesDto;
 import by.innowise.internship.dto.responseDto.PagesDtoResponse;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -11,35 +10,24 @@ import java.util.List;
 
 
 @Service
-public class PagesService {
+public class PagesService<T> {
 
-    public static Pageable getPage(PagesDto pagesDto) {
+    public Pageable getPage(int size, int number, String sort) {
 
-        return PageRequest.of(pagesDto.getPageNumber(),
-                pagesDto.getPageSize(),
-                Sort.by(pagesDto.getSort())
+        return PageRequest.of(number,
+                size,
+                Sort.by(sort)
         );
     }
 
-    public PagesDto getPagesDto(int size, int number, String sort) {
-
-        return PagesDto
-                .builder()
-                .pageSize(size)
-                .pageNumber(number)
-                .sort(sort)
-                .build();
-    }
-
-    public PagesDtoResponse getPagesDtoResponse(PagesDto pagesDto, List all) {
+    public PagesDtoResponse getPagesDtoResponse(int size, int number, String sort, List all) {
 
         return PagesDtoResponse
                 .builder()
-                .page(pagesDto.getPageNumber())
-                .size(pagesDto.getPageSize())
-                .sort(pagesDto.getSort())
+                .page(number)
+                .size(size)
+                .sort(sort)
                 .dto(all)
                 .build();
     }
-
 }

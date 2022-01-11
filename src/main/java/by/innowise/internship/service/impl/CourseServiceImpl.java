@@ -1,11 +1,13 @@
 package by.innowise.internship.service.impl;
 
 import by.innowise.internship.dto.CourseDto;
-import by.innowise.internship.dto.PagesDto;
 import by.innowise.internship.dto.responseDto.CourseDtoResponse;
+import by.innowise.internship.dto.responseDto.PagesDtoResponse;
 import by.innowise.internship.entity.Course;
+import by.innowise.internship.exceptions.NoCreateException;
+import by.innowise.internship.exceptions.NoDataFoundException;
+import by.innowise.internship.exceptions.ResourceNotFoundException;
 import by.innowise.internship.mappers.CourseMapper;
-import by.innowise.internship.mappers.responseMapper.CourseResponseMapper;
 import by.innowise.internship.repository.dao.CourseRepository;
 import by.innowise.internship.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,46 +23,45 @@ public class CourseServiceImpl implements CourseService {
 
     private final CourseRepository courseRepository;
     private final CourseMapper courseMapper;
-    private final CourseResponseMapper courseResponseMapper;
+    private final PagesService pagesService;
 
     @Autowired
     public CourseServiceImpl(CourseRepository courseRepository,
-                             CourseMapper courseMapper,
-                             CourseResponseMapper courseResponseMapper) {
+                             CourseMapper courseMapper, PagesService pagesService) {
         this.courseRepository = courseRepository;
         this.courseMapper = courseMapper;
-        this.courseResponseMapper = courseResponseMapper;
+        this.pagesService = pagesService;
     }
 
     @Override
     @Transactional(readOnly = true)
     public CourseDtoResponse getCourseById(Long id) {
 
-        return courseRepository.findById(id)
-                .map(courseResponseMapper::toDTO)
-                .orElseThrow();
+        return courseMapper.toCourseResponseDto(getCourse(id));
     }
 
 
     @Override
-    public void saveCourse(CourseDto courseDto) {
+    public Long saveCourse(CourseDto courseDto) {
 
-        Optional.ofNullable(courseDto)
+        return Optional.ofNullable(courseDto)
                 .map(courseMapper::toEntity)
                 .map(courseRepository::save)
-                .orElseThrow();
+                .map(Course::getId)
+                .orElseThrow(() -> new NoCreateException("Course not created"));
     }
 
     @Override
-    public void updateCourse(CourseDto courseDto, Long id) {
+    public CourseDtoResponse updateCourse(CourseDto courseDto, Long id) {
 
         Course courseById = getCourse(id);
         Course course = courseMapper.toEntity(courseDto);
 
-        courseById.setName(course.getName());
-//        courseById.setUsers(course.getUsers());
+        if (courseDto.getName().isBlank()) {
 
-        courseRepository.save(courseById);
+            courseById.setName(course.getName());
+        }
+        return courseMapper.toCourseResponseDto(courseRepository.save(courseById));
     }
 
     @Override
@@ -71,20 +72,27 @@ public class CourseServiceImpl implements CourseService {
         courseRepository.delete(course);
     }
 
-    @Override
-    public Page<CourseDtoResponse> getAll(PagesDto pagesDto) {
-
-        return courseRepository.findAll(PagesService.getPage(pagesDto))
-                .map(courseResponseMapper::toDTO);
-
-    }
-
     private Course getCourse(Long id) throws IllegalArgumentException {
 
-        Course course = courseRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("course by id not found"));
+        return courseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("course by id not found"));
+    }
 
-        return course;
+
+    @Override
+    public PagesDtoResponse<CourseDtoResponse> getAll(int size, int page, String sort) {
+
+        Page<CourseDtoResponse> allPositions = courseRepository
+                .findAll(pagesService.getPage(size, page, sort))
+                .map(courseMapper::toCourseResponseDto);
+
+        if (allPositions.isEmpty()) {
+
+            throw new NoDataFoundException("Courses not found");
+        }
+        return pagesService.getPagesDtoResponse(size, page, sort, allPositions.getContent());
+
+
     }
 
 

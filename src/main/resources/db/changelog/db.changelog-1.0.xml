@@ -106,9 +106,9 @@
             (
             id bigserial NOT NULL,
             CONSTRAINT user_courses_pkey PRIMARY KEY (id),
-            user_id bigint NOT NULL
+            user_id bigint
             references application.users,
-            course_id bigint NOT NULL
+            course_id bigint
             references application.courses
             )
 

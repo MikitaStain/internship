@@ -1,14 +1,15 @@
 package by.innowise.internship.service.impl;
 
-import by.innowise.internship.dto.PagesDto;
 import by.innowise.internship.dto.PositionDTO;
+import by.innowise.internship.dto.responseDto.PagesDtoResponse;
 import by.innowise.internship.dto.responseDto.PositionDtoResponse;
 import by.innowise.internship.entity.Position;
+import by.innowise.internship.exceptions.NoCreateException;
+import by.innowise.internship.exceptions.NoDataFoundException;
+import by.innowise.internship.exceptions.ResourceNotFoundException;
 import by.innowise.internship.mappers.PositionMapper;
-import by.innowise.internship.mappers.responseMapper.PositionResponseMapper;
 import by.innowise.internship.repository.dao.PositionRepository;
 import by.innowise.internship.service.PositionService;
-import by.innowise.internship.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -21,49 +22,50 @@ import java.util.Optional;
 public class PositionServiceImpl implements PositionService {
 
     private final PositionRepository positionRepository;
-    private final PositionResponseMapper positionMapperResponse;
     private final PositionMapper positionMapper;
-    private final UserService userService;
+    private final PagesService pagesService;
 
     @Autowired
     public PositionServiceImpl(PositionRepository positionRepository
-            , PositionResponseMapper positionMapperResponse
-            , PositionMapper positionMapper, UserService userService) {
+            , PositionMapper positionMapper
+            , PagesService pagesService) {
 
         this.positionRepository = positionRepository;
-        this.positionMapperResponse = positionMapperResponse;
         this.positionMapper = positionMapper;
-        this.userService = userService;
+        this.pagesService = pagesService;
     }
 
     @Override
     @Transactional(readOnly = true)
     public PositionDtoResponse getPositionById(Long id) {
 
-        return positionRepository.findById(id)
-                .map(positionMapperResponse::toDTO)
-                .orElseThrow();
+        return positionMapper.toPositionResponseDto(getPosition(id));
     }
 
 
     @Override
-    public void savePosition(PositionDTO positionDTO) {
+    public Long savePosition(PositionDTO positionDTO) {
 
-        Optional.ofNullable(positionDTO)
-                .map(positionMapper::toEntity)
+        return Optional.ofNullable(positionDTO)
+                .map(positionMapper::toPositionEntity)
                 .map(positionRepository::save)
-                .orElseThrow(() -> new IllegalArgumentException("Failed to save position"));
+                .map(Position::getId)
+                .orElseThrow(() -> new NoCreateException("Failed to save position"));
     }
 
+
     @Override
-    public void updatePosition(PositionDTO positionDTO, Long id) {
+    public PositionDtoResponse updatePosition(PositionDTO positionDTO, Long id) {
 
         Position positionById = getPosition(id);
-        Position position = positionMapper.toEntity(positionDTO);
+        Position position = positionMapper.toPositionEntity(positionDTO);
 
-        positionById.setName(position.getName());
+        if (positionDTO.getName().isBlank()) {
+            positionById.setName(position.getName());
+        }
 
-        positionRepository.save(positionById);
+        return positionMapper
+                .toPositionResponseDto(positionRepository.save(positionById));
     }
 
     @Override
@@ -74,28 +76,25 @@ public class PositionServiceImpl implements PositionService {
         positionRepository.delete(position);
     }
 
-    private Position getPosition(Long id) throws IllegalArgumentException {
 
-        Position position = positionRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("position by id not found"));
-
-        return position;
-
-    }
-
-    @Override
-    public Page<PositionDtoResponse> getAll(PagesDto pagesDto) {
-
-        return positionRepository.findAll(PagesService.getPage(pagesDto))
-                .map(positionMapperResponse::toDTO);
-    }
-
-    @Override
-    public PositionDTO getDtoPosition(Long id) {
+    private Position getPosition(Long id) {
 
         return positionRepository.findById(id)
-                .map(positionMapper::toDTO)
-                .orElseThrow(() -> new IllegalArgumentException("Position by id not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("position by" + id + " id not found"));
+    }
 
+
+    @Override
+    public PagesDtoResponse<PositionDtoResponse> getAll(int size, int page, String sort) {
+
+        Page<PositionDtoResponse> allPositions = positionRepository
+                .findAll(pagesService.getPage(size, page, sort))
+                .map(positionMapper::toPositionResponseDto);
+
+        if (allPositions.isEmpty()) {
+
+            throw new NoDataFoundException("Position not found");
+        }
+        return pagesService.getPagesDtoResponse(size, page, sort, allPositions.getContent());
     }
 }

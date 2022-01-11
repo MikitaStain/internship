@@ -1,11 +1,9 @@
 package by.innowise.internship.controller;
 
-import by.innowise.internship.dto.PagesDto;
 import by.innowise.internship.dto.PositionDTO;
 import by.innowise.internship.dto.responseDto.PagesDtoResponse;
 import by.innowise.internship.dto.responseDto.PositionDtoResponse;
 import by.innowise.internship.service.PositionService;
-import by.innowise.internship.service.impl.PagesService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/positions")
@@ -30,95 +25,60 @@ import java.util.List;
 public class PositionRestController {
 
     private final PositionService positionService;
-    private final PagesService pagesService;
 
     @Autowired
-    public PositionRestController(PositionService positionService, PagesService pagesService) {
+    public PositionRestController(PositionService positionService) {
         this.positionService = positionService;
-
-        this.pagesService = pagesService;
     }
 
     @GetMapping("/{id}")
     @ApiOperation("getting a position by id")
     public ResponseEntity<PositionDtoResponse> getPosition(@PathVariable("id") Long id) {
 
-        try {
-            PositionDtoResponse positionById = positionService.getPositionById(id);
+        PositionDtoResponse positionById = positionService.getPositionById(id);
 
-            return new ResponseEntity<>(positionById, HttpStatus.OK);
-
-        } catch (Exception e) {
-
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Position by id not found");
-        }
+        return new ResponseEntity<>(positionById, HttpStatus.OK);
     }
 
     @PostMapping
     @ApiOperation("save a position")
-    public ResponseEntity<HttpStatus> createPosition(@RequestBody PositionDTO positionDTO) {
+    public ResponseEntity<Long> createPosition(@RequestBody PositionDTO positionDTO) {
 
-        try {
-            positionService.savePosition(positionDTO);
+        Long idPosition = positionService.savePosition(positionDTO);
 
-        } catch (Exception e) {
-
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
-
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return new ResponseEntity<>(idPosition, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
     @ApiOperation("update a position by id")
-    public ResponseEntity<HttpStatus> updatePosition(@RequestBody PositionDTO positionDTO,
-                                                     @PathVariable("id") Long id) {
+    public ResponseEntity<PositionDtoResponse> updatePosition(@RequestBody PositionDTO positionDTO,
+                                                              @PathVariable("id") Long id) {
 
-        try {
-            positionService.updatePosition(positionDTO, id);
+        PositionDtoResponse position = positionService.updatePosition(positionDTO, id);
 
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e) {
-
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Position by id not found");
-        }
+        return new ResponseEntity<>(position, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     @ApiOperation("delete position by id")
     public ResponseEntity<HttpStatus> deletePosition(@PathVariable("id") Long id) {
 
-        try {
+        positionService.deletePosition(id);
 
-            positionService.deletePosition(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-
-        } catch (Exception e) {
-
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Position by id not found");
-        }
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping
     @ApiOperation("get all position")
-    public ResponseEntity<PagesDtoResponse> getAllPosition(@RequestParam(defaultValue = "5") int size,
-                                                           @RequestParam(defaultValue = "0") int page,
-                                                           @RequestParam(required = false, defaultValue = "name") String name) {
+    public ResponseEntity<PagesDtoResponse<PositionDtoResponse>> getAllPosition
+            (@RequestParam(defaultValue = "5") int size,
+             @RequestParam(defaultValue = "0") int page,
+             @RequestParam(required = false,
+                     defaultValue = "name") String name) {
 
-        PagesDto pagesDto = pagesService.getPagesDto(size, page, name);
+        PagesDtoResponse<PositionDtoResponse> all = positionService.getAll(size, page, name);
 
-        List<PositionDtoResponse> allPosition = positionService
-                .getAll(pagesDto)
-                .getContent();
-
-        if (allPosition.isEmpty()) {
-
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "position is empty");
-        }
-
-        PagesDtoResponse pagesDtoResponse = pagesService.getPagesDtoResponse(pagesDto, allPosition);
-
-        return new ResponseEntity<>(pagesDtoResponse, HttpStatus.OK);
+        return new ResponseEntity<>(all, HttpStatus.OK);
 
     }
 }

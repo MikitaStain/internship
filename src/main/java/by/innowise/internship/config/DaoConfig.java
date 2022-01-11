@@ -2,14 +2,12 @@ package by.innowise.internship.config;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import liquibase.integration.spring.SpringLiquibase;
-import org.hibernate.SessionFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.orm.hibernate5.LocalSessionFactoryBuilder;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -29,20 +27,6 @@ import java.util.Properties;
 @EnableJpaRepositories(basePackages = "by.innowise.internship.repository.dao")
 @EnableTransactionManagement
 public class DaoConfig {
-
-    @Bean
-    public SessionFactory sessionFactory(DataSource dataSource) {
-
-        LocalSessionFactoryBuilder builder = new LocalSessionFactoryBuilder(dataSource);
-        builder.scanPackages("by.innowise.internship");
-        builder.setProperty("hibernate.show_sql", "true");
-//        builder.setProperty("hibernate.ddl-auto","create");
-        builder.setProperty("hibernate.default_schema", "application");
-        builder.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQL10Dialect");
-        builder.setProperty("hibernate.generate_statistics", "true");
-
-        return builder.buildSessionFactory();
-    }
 
     @Bean
     public DataSource dataSource() {
@@ -103,13 +87,19 @@ public class DaoConfig {
         return new PersistenceExceptionTranslationPostProcessor();
     }
 
-    Properties additionalProperties() {
+    private Properties additionalProperties() {
         Properties properties = new Properties();
-        properties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQL10Dialect");
+        properties.setProperty("hibernate.dialect",
+                "org.hibernate.dialect.PostgreSQL10Dialect");
         properties.setProperty("hibernate.show_sql", "true");
         properties.setProperty("hibernate.cache.use_second_level_cache", "true");
         properties.setProperty("hibernate.cache.region.factory_class",
                 "org.hibernate.cache.ehcache.EhCacheRegionFactory");
+//        properties.setProperty("hibernate.jdbc.batch_size", "25");
+//        properties.setProperty("hibernate.order_inserts", "true");
+//        properties.setProperty("hibernate.batch_versioned_data", "true");
+        properties.setProperty("hibernate.format_sql", "true");
+//        properties.setProperty("hibernate.hbm2ddl.auto","create");
 
         return properties;
     }

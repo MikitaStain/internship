@@ -25,11 +25,9 @@ import javax.persistence.Table;
 @Setter
 @Getter
 @NoArgsConstructor
-@EqualsAndHashCode
-@ToString
+@EqualsAndHashCode(exclude = "user")
+@ToString(exclude = "user")
 @Table(name = "emails", schema = "application")
-@Cacheable
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Email {
 
     @Id
@@ -40,7 +38,7 @@ public class Email {
     @Column(name = "email")
     private String email;
 
-    @ManyToOne(optional = false, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 }
