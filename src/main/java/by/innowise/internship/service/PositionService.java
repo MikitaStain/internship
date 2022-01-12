@@ -3,6 +3,7 @@ package by.innowise.internship.service;
 import by.innowise.internship.dto.PositionDTO;
 import by.innowise.internship.dto.responseDto.PagesDtoResponse;
 import by.innowise.internship.dto.responseDto.PositionDtoResponse;
+import by.innowise.internship.entity.Position;
 
 public interface PositionService {
 
@@ -15,5 +16,7 @@ public interface PositionService {
     void deletePosition(Long id);
 
     PagesDtoResponse<PositionDtoResponse> getAll(int size, int page, String sort);
+
+    Position getPosition(Long id);
 
 }

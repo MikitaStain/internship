@@ -12,15 +12,12 @@ public interface UserService {
 
     Long saveUser(UserCreateRequestDto userDto);
 
-    UserDtoResponse updateUser(UserDto userDto, Long id);
+    UserDtoResponse updateUser(UserDto userDto, Long id, Long positionId, Long courseId);
 
     void deleteUser(Long id);
 
     PagesDtoResponse<UserDtoResponse> getAll(int size, int page, String sort);
 
     User getUser(Long id);
-
-    void addPosition(Long id, Long idPosition);
-
 
 }

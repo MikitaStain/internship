@@ -4,13 +4,15 @@ import by.innowise.internship.dto.UserCreateRequestDto;
 import by.innowise.internship.dto.UserDto;
 import by.innowise.internship.dto.responseDto.PagesDtoResponse;
 import by.innowise.internship.dto.responseDto.UserDtoResponse;
+import by.innowise.internship.entity.Course;
 import by.innowise.internship.entity.User;
 import by.innowise.internship.exceptions.NoCreateException;
 import by.innowise.internship.exceptions.NoDataFoundException;
 import by.innowise.internship.exceptions.ResourceNotFoundException;
 import by.innowise.internship.mappers.UserMapper;
-import by.innowise.internship.repository.dao.PositionRepository;
 import by.innowise.internship.repository.dao.UserRepository;
+import by.innowise.internship.service.CourseService;
+import by.innowise.internship.service.PositionService;
 import by.innowise.internship.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -26,20 +28,23 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private final PositionRepository positionRepository;
     private final PagesService pagesService;
+    private final PositionService positionService;
+    private final CourseService courseService;
 
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository,
                            UserMapper userMapper,
-                           PositionRepository positionRepository,
-                           PagesService pagesService) {
+                           PagesService pagesService,
+                           PositionService positionService,
+                           CourseService courseService) {
 
         this.userRepository = userRepository;
         this.userMapper = userMapper;
-        this.positionRepository = positionRepository;
         this.pagesService = pagesService;
+        this.positionService = positionService;
+        this.courseService = courseService;
     }
 
     @Override
@@ -61,17 +66,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDtoResponse updateUser(UserDto userDto, Long id) {
+    public UserDtoResponse updateUser(UserDto userDto, Long userId, Long positionId, Long courseId) {
 
-        User userById = getUser(id);
+        User userById = getUser(userId);
         User updateUser = userMapper.toEntity(userDto);
 
-        User save = userRepository.save(update(userById, updateUser));
+        User save = userRepository.save(update(userById, updateUser, positionId, courseId));
 
         return userMapper.toUserResponseDto(save);
     }
 
-    private User update(User user, User updateUser) {
+    private User update(User user, User updateUser, Long positionId, Long courseId) {
 
         if (!updateUser.getName().isBlank()) {
             user.setName(updateUser.getName());
@@ -85,8 +90,33 @@ public class UserServiceImpl implements UserService {
             user.setPassword(updateUser.getPassword());
         }
 
+        if (positionId == null) {
+
+            user.setPosition(null);
+        } else {
+
+            user.setPosition(positionService.getPosition(positionId));
+        }
+
+        Course course = courseService.getCourse(courseId);
+
+        if (user.getCourses()
+                .stream()
+                .noneMatch(item -> item.equals(course))) {
+
+            user.getCourses().add(course);
+
+        } else {
+
+            user.getCourses()
+                    .stream()
+                    .filter(item -> item.equals(course))
+                    .forEach(item -> item.getUsers().remove(user));
+        }
+
         return user;
     }
+
 
     @Override
     public void deleteUser(Long id) {
@@ -117,19 +147,5 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(id)
                 .orElseThrow(
                         () -> new ResourceNotFoundException("user by id " + id + " not found"));
-    }
-
-    @Override
-    public void addPosition(Long id, Long idPosition) {
-
-        User user = getUser(id);
-
-        user.setPosition(
-                positionRepository.findById(idPosition)
-                        .orElseThrow(
-                                () -> new ResourceNotFoundException("position by id " + idPosition + " not found"))
-        );
-
-        userRepository.save(user);
     }
 }

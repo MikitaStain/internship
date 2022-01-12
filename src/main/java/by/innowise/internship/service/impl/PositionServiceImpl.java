@@ -60,12 +60,14 @@ public class PositionServiceImpl implements PositionService {
         Position positionById = getPosition(id);
         Position position = positionMapper.toPositionEntity(positionDTO);
 
-        if (positionDTO.getName().isBlank()) {
+        if (!positionDTO.getName().isBlank()) {
             positionById.setName(position.getName());
         }
 
+        positionRepository.save(positionById);
+
         return positionMapper
-                .toPositionResponseDto(positionRepository.save(positionById));
+                .toPositionResponseDto(positionById);
     }
 
     @Override
@@ -76,11 +78,11 @@ public class PositionServiceImpl implements PositionService {
         positionRepository.delete(position);
     }
 
-
-    private Position getPosition(Long id) {
+    @Override
+    public Position getPosition(Long id) {
 
         return positionRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("position by" + id + " id not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("position by id " + id + " not found"));
     }
 
 

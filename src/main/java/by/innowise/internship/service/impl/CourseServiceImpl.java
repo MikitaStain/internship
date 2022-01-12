@@ -72,7 +72,7 @@ public class CourseServiceImpl implements CourseService {
         courseRepository.delete(course);
     }
 
-    private Course getCourse(Long id) throws IllegalArgumentException {
+    public Course getCourse(Long id) {
 
         return courseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("course by id not found"));

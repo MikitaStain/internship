@@ -4,6 +4,7 @@ spring:
     enabled: true
     change-log: classpath:/db/changelog/db.changelog-root.xml
 
+
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQL10Dialect
     show-sql: true

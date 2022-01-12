@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/users")
@@ -55,9 +54,11 @@ public class UserRestController {
     @PatchMapping("/{id}/")
     @ApiOperation("update a user by id")
     public ResponseEntity<UserDtoResponse> updateUser(@RequestBody UserDto userDto,
-                                                      @PathVariable("id") Long id) {
+                                                      @PathVariable("id") Long id,
+                                                      @RequestParam(required = false) Long positionId,
+                                                      @RequestParam(required = false) Long courseId) {
 
-        UserDtoResponse userDtoResponse = userService.updateUser(userDto, id);
+        UserDtoResponse userDtoResponse = userService.updateUser(userDto, id, positionId, courseId);
 
         return new ResponseEntity<>(userDtoResponse, HttpStatus.OK);
     }
@@ -81,15 +82,5 @@ public class UserRestController {
         PagesDtoResponse<UserDtoResponse> users = userService.getAll(size, page, name);
 
         return new ResponseEntity<>(users, HttpStatus.OK);
-    }
-
-    @PatchMapping("/{id}/positions")
-    @ApiOperation("add positions for user")
-    public ResponseEntity<HttpStatus> addPositions(@PathVariable("id") Long id,
-                                                   @RequestParam Long idPosition) {
-
-        userService.addPosition(id, idPosition);
-
-        throw new ResponseStatusException(HttpStatus.OK);
     }
 }

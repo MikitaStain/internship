@@ -54,7 +54,6 @@ public class CourseRestController {
     @ApiOperation("update a course by id")
     public ResponseEntity<CourseDtoResponse> updateCourse(@RequestBody CourseDto courseDto,
                                                           @PathVariable("id") Long id) {
-
         CourseDtoResponse course = courseService.updateCourse(courseDto, id);
 
         return new ResponseEntity<>(course, HttpStatus.OK);
