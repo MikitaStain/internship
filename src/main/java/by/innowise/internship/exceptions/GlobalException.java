@@ -41,4 +41,37 @@ public class GlobalException {
 
         return new ResponseEntity<>(errorObject, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(NotParameterException.class)
+    public ResponseEntity<ErrorObject> handleNotParameterException(NotParameterException ex) {
+        ErrorObject errorObject = new ErrorObject();
+        errorObject.setStatusCode(HttpStatus.BAD_REQUEST.value());
+        errorObject.setMessage(ex.getMessage());
+        errorObject.setTimestamp(CalendarUtils.
+                convertMilliSecondsToFormattedDate(System.currentTimeMillis()));
+
+        return new ResponseEntity<>(errorObject, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(EmailInvalidException.class)
+    public ResponseEntity<ErrorObject> handleEmailInvalidException(EmailInvalidException ex) {
+        ErrorObject errorObject = new ErrorObject();
+        errorObject.setStatusCode(HttpStatus.BAD_REQUEST.value());
+        errorObject.setMessage(ex.getMessage());
+        errorObject.setTimestamp(CalendarUtils.
+                convertMilliSecondsToFormattedDate(System.currentTimeMillis()));
+
+        return new ResponseEntity<>(errorObject, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(DuplicateException.class)
+    public ResponseEntity<ErrorObject> handleDuplicate(DuplicateException ex) {
+        ErrorObject errorObject = new ErrorObject();
+        errorObject.setStatusCode(HttpStatus.BAD_REQUEST.value());
+        errorObject.setMessage(ex.getMessage());
+        errorObject.setTimestamp(CalendarUtils.
+                convertMilliSecondsToFormattedDate(System.currentTimeMillis()));
+
+        return new ResponseEntity<>(errorObject, HttpStatus.BAD_REQUEST);
+    }
 }

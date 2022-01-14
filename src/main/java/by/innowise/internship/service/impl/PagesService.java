@@ -10,7 +10,7 @@ import java.util.List;
 
 
 @Service
-public class PagesService<T> {
+public class PagesService {
 
     public Pageable getPage(int size, int number, String sort) {
 

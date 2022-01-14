@@ -10,12 +10,15 @@ import by.innowise.internship.exceptions.ResourceNotFoundException;
 import by.innowise.internship.mappers.PositionMapper;
 import by.innowise.internship.repository.dao.PositionRepository;
 import by.innowise.internship.service.PositionService;
+import by.innowise.internship.util.Validation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -24,15 +27,18 @@ public class PositionServiceImpl implements PositionService {
     private final PositionRepository positionRepository;
     private final PositionMapper positionMapper;
     private final PagesService pagesService;
+    private final Validation validation;
 
     @Autowired
     public PositionServiceImpl(PositionRepository positionRepository
             , PositionMapper positionMapper
-            , PagesService pagesService) {
+            , PagesService pagesService
+            , Validation validation) {
 
         this.positionRepository = positionRepository;
         this.positionMapper = positionMapper;
         this.pagesService = pagesService;
+        this.validation = validation;
     }
 
     @Override
@@ -46,11 +52,21 @@ public class PositionServiceImpl implements PositionService {
     @Override
     public Long savePosition(PositionDTO positionDTO) {
 
-        return Optional.ofNullable(positionDTO)
+        validation.checkDuplicateParameter(positionsName(), positionDTO.getName());
+        validation.checkParameter(positionDTO.getName());
+
+        return Optional.of(positionDTO)
                 .map(positionMapper::toPositionEntity)
                 .map(positionRepository::save)
                 .map(Position::getId)
                 .orElseThrow(() -> new NoCreateException("Failed to save position"));
+    }
+
+    private List<String> positionsName() {
+
+        return positionRepository.findAll().stream()
+                .map(Position::getName)
+                .collect(Collectors.toList());
     }
 
 

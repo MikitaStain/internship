@@ -10,12 +10,15 @@ import by.innowise.internship.exceptions.ResourceNotFoundException;
 import by.innowise.internship.mappers.CourseMapper;
 import by.innowise.internship.repository.dao.CourseRepository;
 import by.innowise.internship.service.CourseService;
+import by.innowise.internship.util.Validation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -24,13 +27,17 @@ public class CourseServiceImpl implements CourseService {
     private final CourseRepository courseRepository;
     private final CourseMapper courseMapper;
     private final PagesService pagesService;
+    private final Validation validation;
 
     @Autowired
     public CourseServiceImpl(CourseRepository courseRepository,
-                             CourseMapper courseMapper, PagesService pagesService) {
+                             CourseMapper courseMapper,
+                             PagesService pagesService,
+                             Validation validation) {
         this.courseRepository = courseRepository;
         this.courseMapper = courseMapper;
         this.pagesService = pagesService;
+        this.validation = validation;
     }
 
     @Override
@@ -44,11 +51,21 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public Long saveCourse(CourseDto courseDto) {
 
-        return Optional.ofNullable(courseDto)
+        validation.checkDuplicateParameter(coursesName(), courseDto.getName());
+        validation.checkParameter(courseDto.getName());
+
+        return Optional.of(courseDto)
                 .map(courseMapper::toEntity)
                 .map(courseRepository::save)
                 .map(Course::getId)
                 .orElseThrow(() -> new NoCreateException("Course not created"));
+    }
+
+    private List<String> coursesName() {
+
+        return courseRepository.findAll().stream()
+                .map(Course::getName)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -67,9 +84,7 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public void deleteCourse(Long id) {
 
-        Course course = getCourse(id);
-
-        courseRepository.delete(course);
+        courseRepository.delete(getCourse(id));
     }
 
     public Course getCourse(Long id) {
@@ -80,7 +95,7 @@ public class CourseServiceImpl implements CourseService {
 
 
     @Override
-    public PagesDtoResponse<CourseDtoResponse> getAll(int size, int page, String sort) {
+    public PagesDtoResponse getAll(int size, int page, String sort) {
 
         Page<CourseDtoResponse> allPositions = courseRepository
                 .findAll(pagesService.getPage(size, page, sort))
@@ -91,9 +106,5 @@ public class CourseServiceImpl implements CourseService {
             throw new NoDataFoundException("Courses not found");
         }
         return pagesService.getPagesDtoResponse(size, page, sort, allPositions.getContent());
-
-
     }
-
-
 }

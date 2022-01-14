@@ -14,13 +14,16 @@ import by.innowise.internship.repository.dao.UserRepository;
 import by.innowise.internship.service.CourseService;
 import by.innowise.internship.service.PositionService;
 import by.innowise.internship.service.UserService;
+import by.innowise.internship.util.Validation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -31,6 +34,7 @@ public class UserServiceImpl implements UserService {
     private final PagesService pagesService;
     private final PositionService positionService;
     private final CourseService courseService;
+    private final Validation validation;
 
 
     @Autowired
@@ -38,13 +42,15 @@ public class UserServiceImpl implements UserService {
                            UserMapper userMapper,
                            PagesService pagesService,
                            PositionService positionService,
-                           CourseService courseService) {
+                           CourseService courseService,
+                           Validation validation) {
 
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.pagesService = pagesService;
         this.positionService = positionService;
         this.courseService = courseService;
+        this.validation = validation;
     }
 
     @Override
@@ -58,22 +64,31 @@ public class UserServiceImpl implements UserService {
     @Override
     public Long saveUser(UserCreateRequestDto userDto) {
 
-        return Optional.ofNullable(userDto)
+        validation.checkDuplicateParameter(userLogins(), userDto.getLogin());
+        validation.checkParameter(userDto.getLogin());
+
+        return Optional.of(userDto)
                 .map(userMapper::create)
                 .map(userRepository::save)
                 .map(User::getId)
                 .orElseThrow(() -> new NoCreateException("User can not created"));
     }
 
+    private List<String> userLogins() {
+
+        return userRepository.findAll().stream()
+                .map(User::getLogin)
+                .collect(Collectors.toList());
+    }
+
+
     @Override
     public UserDtoResponse updateUser(UserDto userDto, Long userId, Long positionId, Long courseId) {
 
-        User userById = getUser(userId);
-        User updateUser = userMapper.toEntity(userDto);
-
-        User save = userRepository.save(update(userById, updateUser, positionId, courseId));
-
-        return userMapper.toUserResponseDto(save);
+        return Optional.of(update(getUser(userId), userMapper.toEntity(userDto), positionId, courseId))
+                .map(userRepository::save)
+                .map(userMapper::toUserResponseDto)
+                .orElseThrow();
     }
 
     private User update(User user, User updateUser, Long positionId, Long courseId) {
@@ -98,20 +113,16 @@ public class UserServiceImpl implements UserService {
             user.setPosition(positionService.getPosition(positionId));
         }
 
-        Course course = courseService.getCourse(courseId);
+        if (courseId != null) {
 
-        if (user.getCourses()
-                .stream()
-                .noneMatch(item -> item.equals(course))) {
+            Course course = courseService.getCourse(courseId);
 
-            user.getCourses().add(course);
-
-        } else {
-
-            user.getCourses()
+            if (user.getCourses()
                     .stream()
-                    .filter(item -> item.equals(course))
-                    .forEach(item -> item.getUsers().remove(user));
+                    .noneMatch(item -> item.equals(course))) {
+
+                user.getCourses().add(course);
+            }
         }
 
         return user;
