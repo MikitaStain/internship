@@ -105,8 +105,9 @@ public class PositionServiceImpl implements PositionService {
     @Override
     public PagesDtoResponse<PositionDtoResponse> getAll(int size, int page, String sort) {
 
-        Page<PositionDtoResponse> allPositions = positionRepository
-                .findAll(pagesService.getPage(size, page, sort))
+        Page<PositionDtoResponse> allPositions =
+                positionRepository.findAll(
+                        pagesService.getPage(size, page, sort))
                 .map(positionMapper::toPositionResponseDto);
 
         if (allPositions.isEmpty()) {

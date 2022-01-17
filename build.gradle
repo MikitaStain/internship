@@ -15,16 +15,18 @@ ext {
 }
 
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '2.6.2'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '2.6.2'
+    testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.6.2'
+
 
     implementation group: 'org.springframework', name: 'spring-core', version: '5.2.18.RELEASE'
     implementation group: 'org.springframework', name: 'spring-context', version: '5.2.18.RELEASE'
     implementation group: 'org.springframework', name: 'spring-beans', version: '5.2.18.RELEASE'
+    testImplementation group: 'org.springframework.restdocs', name: 'spring-restdocs-mockmvc', version: '2.0.6.RELEASE'
 
+//TODO delete it
     implementation group: 'org.yaml', name: 'snakeyaml', version: '1.29'
 
 
@@ -40,18 +42,31 @@ dependencies {
 
 
     implementation group: 'org.mapstruct', name: 'mapstruct', version: '1.4.2.Final'
-    testImplementation "org.testng:testng:6.10", "org.easytesting:fest-assert:1.4"
     annotationProcessor "org.mapstruct:mapstruct-processor:1.5.0.Beta1"
+
+//    testImplementation "org.testng:testng:6.10", "org.easytesting:fest-assert:1.4"
 
     implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: '3.0.0'
     implementation group: 'io.springfox', name: 'springfox-swagger2', version: '3.0.0'
 
     implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.6.4'
 
-    testImplementation group: 'junit', name: 'junit', version: '4.13.2'
+//    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+//    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+//    testImplementation group: 'org.junit.vintage', name: 'junit-vintage-engine', version: '5.8.1'
+
+
+    testImplementation group: 'org.hamcrest', name: 'hamcrest-core', version: '2.2'
+
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '4.2.0'
+
+    implementation group: 'com.jayway.jsonpath', name: 'json-path', version: '2.6.0'
+    testImplementation group: 'com.jayway.jsonpath', name: 'json-path-assert', version: '2.6.0'
+
+    testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.22.0'
 }
 
 
-//test {
-//    useJUnitPlatform()
-//}
+test {
+    useJUnitPlatform()
+}
