@@ -6,6 +6,7 @@ import by.innowise.internship.dto.responseDto.PositionDtoResponse;
 import by.innowise.internship.entity.Position;
 import by.innowise.internship.exceptions.NoCreateException;
 import by.innowise.internship.exceptions.NoDataFoundException;
+import by.innowise.internship.exceptions.NoUpdateException;
 import by.innowise.internship.exceptions.ResourceNotFoundException;
 import by.innowise.internship.mappers.PositionMapper;
 import by.innowise.internship.repository.dao.PositionRepository;
@@ -73,17 +74,20 @@ public class PositionServiceImpl implements PositionService {
     @Override
     public PositionDtoResponse updatePosition(PositionDTO positionDTO, Long id) {
 
-        Position positionById = getPosition(id);
-        Position position = positionMapper.toPositionEntity(positionDTO);
-
         if (!positionDTO.getName().isBlank()) {
+
+            Position positionById = getPosition(id);
+            Position position = positionMapper.toPositionEntity(positionDTO);
+
             positionById.setName(position.getName());
+            positionRepository.save(positionById);
+
+            return positionMapper
+                    .toPositionResponseDto(positionById);
         }
 
-        positionRepository.save(positionById);
-
-        return positionMapper
-                .toPositionResponseDto(positionById);
+        throw new NoUpdateException("Position by id: " + id + " cannot be update to name: "
+                + positionDTO.getName());
     }
 
     @Override
@@ -108,7 +112,7 @@ public class PositionServiceImpl implements PositionService {
         Page<PositionDtoResponse> allPositions =
                 positionRepository.findAll(
                         pagesService.getPage(size, page, sort))
-                .map(positionMapper::toPositionResponseDto);
+                        .map(positionMapper::toPositionResponseDto);
 
         if (allPositions.isEmpty()) {
 

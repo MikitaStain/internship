@@ -65,7 +65,7 @@ public class GlobalException {
     }
 
     @ExceptionHandler(DuplicateException.class)
-    public ResponseEntity<ErrorObject> handleDuplicate(DuplicateException ex) {
+    public ResponseEntity<ErrorObject> handleDuplicateException(DuplicateException ex) {
         ErrorObject errorObject = new ErrorObject();
         errorObject.setStatusCode(HttpStatus.BAD_REQUEST.value());
         errorObject.setMessage(ex.getMessage());
@@ -73,5 +73,16 @@ public class GlobalException {
                 convertMilliSecondsToFormattedDate(System.currentTimeMillis()));
 
         return new ResponseEntity<>(errorObject, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NoUpdateException.class)
+    public ResponseEntity<ErrorObject> handleNoUpdateException(NoUpdateException ex) {
+        ErrorObject errorObject = new ErrorObject();
+        errorObject.setStatusCode(HttpStatus.CONFLICT.value());
+        errorObject.setMessage(ex.getMessage());
+        errorObject.setTimestamp(CalendarUtils.
+                convertMilliSecondsToFormattedDate(System.currentTimeMillis()));
+
+        return new ResponseEntity<>(errorObject, HttpStatus.CONFLICT);
     }
 }
