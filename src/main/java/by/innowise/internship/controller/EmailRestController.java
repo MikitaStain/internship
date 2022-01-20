@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -54,7 +55,7 @@ public class EmailRestController {
     }
 
 
-    @PatchMapping("/{email_id}")
+    @PutMapping("/{email_id}")
     @ApiOperation("update email by id")
     public ResponseEntity<EmailDtoResponse> updateEmail(@RequestBody EmailDto emailDto,
                                                         @PathVariable("email_id") Long emailId,

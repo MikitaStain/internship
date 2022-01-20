@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -50,7 +51,7 @@ public class CourseRestController {
 
     }
 
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     @ApiOperation("update a course by id")
     public ResponseEntity<CourseDtoResponse> updateCourse(@RequestBody CourseDto courseDto,
                                                           @PathVariable("id") Long id) {

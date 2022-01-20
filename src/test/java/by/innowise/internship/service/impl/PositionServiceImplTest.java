@@ -5,7 +5,6 @@ import by.innowise.internship.dto.responseDto.PagesDtoResponse;
 import by.innowise.internship.dto.responseDto.PositionDtoResponse;
 import by.innowise.internship.entity.Position;
 import by.innowise.internship.exceptions.NoCreateException;
-import by.innowise.internship.exceptions.NoUpdateException;
 import by.innowise.internship.exceptions.ResourceNotFoundException;
 import by.innowise.internship.mappers.PositionMapper;
 import by.innowise.internship.repository.dao.PositionRepository;
@@ -191,7 +190,6 @@ class PositionServiceImplTest {
         Mockito.when(pagesService.getPage(PAGE, NUMBER, SORTED)).thenReturn(expectedPageable);
         Mockito.when(positionMapper.toPositionResponseDto(expectedPosition)).thenReturn(expectedPositionDtoResponse);
         Mockito.when(pagesService.getPagesDtoResponse(PAGE, NUMBER, SORTED, POSITIONS_NAME)).thenReturn(expectedPagesDtoResponse);
-
 
 
     }
