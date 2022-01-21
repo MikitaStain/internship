@@ -2,7 +2,6 @@ package by.innowise.internship.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -15,7 +14,6 @@ public class MyErrorHandler implements ResponseErrorHandler {
     @Override
     public void handleError(ClientHttpResponse response) throws IOException, ResponseStatusException {
 
-        try {
             if (response.getStatusCode()
                     .series() == SERVER_ERROR) {
 
@@ -25,13 +23,6 @@ public class MyErrorHandler implements ResponseErrorHandler {
             } else if (response.getStatusCode()
                     .series() == CLIENT_ERROR) {
             }
-
-
-        } catch (HttpClientErrorException e) {
-
-            System.out.println(e.getMessage());
-        }
-
     }
 
     @Override

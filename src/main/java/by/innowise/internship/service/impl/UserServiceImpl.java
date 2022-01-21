@@ -2,6 +2,8 @@ package by.innowise.internship.service.impl;
 
 import by.innowise.internship.dto.UserCreateRequestDto;
 import by.innowise.internship.dto.UserDto;
+import by.innowise.internship.dto.UserDtoForFilter;
+import by.innowise.internship.dto.buildDto.Builders;
 import by.innowise.internship.dto.responseDto.PagesDtoResponse;
 import by.innowise.internship.dto.responseDto.UserDtoResponse;
 import by.innowise.internship.entity.Course;
@@ -11,6 +13,7 @@ import by.innowise.internship.exceptions.NoDataFoundException;
 import by.innowise.internship.exceptions.ResourceNotFoundException;
 import by.innowise.internship.mappers.UserMapper;
 import by.innowise.internship.repository.dao.UserRepository;
+import by.innowise.internship.repository.filter.FilterForSearchUsers;
 import by.innowise.internship.service.CourseService;
 import by.innowise.internship.service.PositionService;
 import by.innowise.internship.service.UserService;
@@ -35,6 +38,8 @@ public class UserServiceImpl implements UserService {
     private final PositionService positionService;
     private final CourseService courseService;
     private final Validation validation;
+    private final Builders builders;
+    private final FilterForSearchUsers filterForSearchUsers;
 
 
     @Autowired
@@ -43,7 +48,7 @@ public class UserServiceImpl implements UserService {
                            PagesService pagesService,
                            PositionService positionService,
                            CourseService courseService,
-                           Validation validation) {
+                           Validation validation, Builders builders, FilterForSearchUsers filterForSearchUsers) {
 
         this.userRepository = userRepository;
         this.userMapper = userMapper;
@@ -51,6 +56,8 @@ public class UserServiceImpl implements UserService {
         this.positionService = positionService;
         this.courseService = courseService;
         this.validation = validation;
+        this.builders = builders;
+        this.filterForSearchUsers = filterForSearchUsers;
     }
 
     @Override
@@ -151,6 +158,26 @@ public class UserServiceImpl implements UserService {
         return pagesService.getPagesDtoResponse(size, page, sort, allUsers.getContent());
     }
 
+    @Override
+    public List<UserDtoResponse> getUsersByFilter(String userName,
+                                                  String userLogin,
+                                                  String userLastName,
+                                                  String position,
+                                                  String course,
+                                                  int size,
+                                                  int page,
+                                                  String sort) {
+
+        UserDtoForFilter userDtoForFilter = builders.buildUserDtoForFilter(
+                userName, userLogin, userLastName, position, course);
+
+        List<User> userByFilter = filterForSearchUsers.findUserByFilter(userDtoForFilter);
+        List<UserDtoResponse> collect = userByFilter.stream()
+                .map(user -> userMapper.toUserResponseDto(user))
+                .collect(Collectors.toList());
+
+        return collect;
+    }
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public User getUser(Long id) {

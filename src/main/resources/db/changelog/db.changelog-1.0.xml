@@ -38,10 +38,9 @@
             (
             user_id bigserial NOT NULL,
             last_name character varying(255),
-            login varchar(255),
+            login varchar(255) UNIQUE,
             name varchar(255),
             password varchar(255),
-            role varchar(255),
             position_id bigint
             references application.positions,
             CONSTRAINT users_pkey PRIMARY KEY (user_id)

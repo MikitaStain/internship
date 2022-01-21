@@ -37,6 +37,7 @@ public class PositionRestController {
     public ResponseEntity<PositionDtoResponse> getPosition(@PathVariable("id") Long id) {
 
         PositionDtoResponse positionById = positionService.getPositionById(id);
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
         return new ResponseEntity<>(positionById, HttpStatus.OK);
     }
@@ -78,6 +79,7 @@ public class PositionRestController {
                      defaultValue = "name") String name) {
 
         PagesDtoResponse<PositionDtoResponse> all = positionService.getAll(size, page, name);
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
         return new ResponseEntity<>(all, HttpStatus.OK);
 

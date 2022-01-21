@@ -46,6 +46,7 @@ public class CourseRestController {
     public ResponseEntity<CourseDtoResponse> getCourseByID(@PathVariable("id") Long id) {
 
         CourseDtoResponse courseById = courseService.getCourseById(id);
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
         return new ResponseEntity<>(courseById, HttpStatus.OK);
 
@@ -80,6 +81,7 @@ public class CourseRestController {
                      defaultValue = "name") String name) {
 
         PagesDtoResponse<CourseDtoResponse> allCourses = courseService.getAll(size, page, name);
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
         return new ResponseEntity<>(allCourses, HttpStatus.OK);
     }
