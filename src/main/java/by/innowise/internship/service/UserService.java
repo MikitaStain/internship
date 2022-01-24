@@ -6,8 +6,6 @@ import by.innowise.internship.dto.responseDto.PagesDtoResponse;
 import by.innowise.internship.dto.responseDto.UserDtoResponse;
 import by.innowise.internship.entity.User;
 
-import java.util.List;
-
 public interface UserService {
 
     UserDtoResponse getUserById(Long id);
@@ -22,12 +20,12 @@ public interface UserService {
 
     User getUser(Long id);
 
-    List<UserDtoResponse> getUsersByFilter(String userName,
-                                String userLogin,
-                                String userLastName,
-                                String position,
-                                String course,
-                                int size,
-                                int page,
-                                String sort);
+    PagesDtoResponse<UserDtoResponse> getUsersByFilter(String userName,
+                                                       String userLogin,
+                                                       String userLastName,
+                                                       String position,
+                                                       String course,
+                                                       int size,
+                                                       int page,
+                                                       String sort);
 }

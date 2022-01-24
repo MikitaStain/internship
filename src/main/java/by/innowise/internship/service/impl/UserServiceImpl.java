@@ -2,7 +2,6 @@ package by.innowise.internship.service.impl;
 
 import by.innowise.internship.dto.UserCreateRequestDto;
 import by.innowise.internship.dto.UserDto;
-import by.innowise.internship.dto.UserDtoForFilter;
 import by.innowise.internship.dto.buildDto.Builders;
 import by.innowise.internship.dto.responseDto.PagesDtoResponse;
 import by.innowise.internship.dto.responseDto.UserDtoResponse;
@@ -13,13 +12,14 @@ import by.innowise.internship.exceptions.NoDataFoundException;
 import by.innowise.internship.exceptions.ResourceNotFoundException;
 import by.innowise.internship.mappers.UserMapper;
 import by.innowise.internship.repository.dao.UserRepository;
-import by.innowise.internship.repository.filter.FilterForSearchUsers;
+import by.innowise.internship.repository.specifications.UserSpecifications;
 import by.innowise.internship.service.CourseService;
 import by.innowise.internship.service.PositionService;
 import by.innowise.internship.service.UserService;
 import by.innowise.internship.util.Validation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,7 +39,6 @@ public class UserServiceImpl implements UserService {
     private final CourseService courseService;
     private final Validation validation;
     private final Builders builders;
-    private final FilterForSearchUsers filterForSearchUsers;
 
 
     @Autowired
@@ -48,7 +47,7 @@ public class UserServiceImpl implements UserService {
                            PagesService pagesService,
                            PositionService positionService,
                            CourseService courseService,
-                           Validation validation, Builders builders, FilterForSearchUsers filterForSearchUsers) {
+                           Validation validation, Builders builders) {
 
         this.userRepository = userRepository;
         this.userMapper = userMapper;
@@ -57,7 +56,6 @@ public class UserServiceImpl implements UserService {
         this.courseService = courseService;
         this.validation = validation;
         this.builders = builders;
-        this.filterForSearchUsers = filterForSearchUsers;
     }
 
     @Override
@@ -159,24 +157,39 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDtoResponse> getUsersByFilter(String userName,
-                                                  String userLogin,
-                                                  String userLastName,
-                                                  String position,
-                                                  String course,
-                                                  int size,
-                                                  int page,
-                                                  String sort) {
+    public PagesDtoResponse<UserDtoResponse> getUsersByFilter(String userName,
+                                                              String userLogin,
+                                                              String userLastName,
+                                                              String position,
+                                                              String course,
+                                                              int size,
+                                                              int page,
+                                                              String sort) {
 
-        UserDtoForFilter userDtoForFilter = builders.buildUserDtoForFilter(
-                userName, userLogin, userLastName, position, course);
+        Page<UserDtoResponse> usersFilter = userRepository
+                .findAll(getSpecification(userName, userLogin, userLastName, position, course)
+                        , pagesService.getPage(size, page, sort)).map(userMapper::toUserResponseDto);
 
-        List<User> userByFilter = filterForSearchUsers.findUserByFilter(userDtoForFilter);
-        List<UserDtoResponse> collect = userByFilter.stream()
-                .map(user -> userMapper.toUserResponseDto(user))
-                .collect(Collectors.toList());
 
-        return collect;
+        if (usersFilter.isEmpty()) {
+
+            throw new NoDataFoundException("Users not found");
+        }
+
+        return pagesService.getPagesDtoResponse(size, page, sort, usersFilter.getContent());
+    }
+
+    private Specification<User> getSpecification(String userName,
+                                                 String userLogin,
+                                                 String userLastName,
+                                                 String position,
+                                                 String course) {
+
+        return UserSpecifications.likeName(userName)
+                .and(UserSpecifications.likeLogin(userLogin))
+                .and(UserSpecifications.likeLastName(userLastName))
+                .and(UserSpecifications.likePosition(position))
+                .and(UserSpecifications.likeCourse(course));
     }
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)

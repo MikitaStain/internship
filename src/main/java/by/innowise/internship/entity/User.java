@@ -28,8 +28,8 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-@EqualsAndHashCode(exclude = {"courses","emails"})
-@ToString(exclude = {"courses","emails"})
+@EqualsAndHashCode
+@ToString
 @Table(name = "users", schema = "application")
 public class User implements Cloneable {
 

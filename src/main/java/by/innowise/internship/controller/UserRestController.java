@@ -21,8 +21,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/users")
 @Api("User Rest Controller")
@@ -41,7 +39,7 @@ public class UserRestController {
 
         UserDtoResponse userById = userService.getUserById(id);
 
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+
 
         return new ResponseEntity<>(userById, HttpStatus.OK);
     }
@@ -84,14 +82,14 @@ public class UserRestController {
              @RequestParam(required = false, defaultValue = "name") String name) {
 
         PagesDtoResponse<UserDtoResponse> users = userService.getAll(size, page, name);
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+
 
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
     @GetMapping("/filter")
     @ApiOperation("filter users")
-    public ResponseEntity<List<UserDtoResponse>> getUsersByFilter(
+    public ResponseEntity<PagesDtoResponse<UserDtoResponse>> getUsersByFilter(
             @RequestParam(required = false) String userName,
             @RequestParam(required = false) String userLogin,
             @RequestParam(required = false) String userLastName,
@@ -102,15 +100,12 @@ public class UserRestController {
             @RequestParam(required = false, defaultValue = "name") String sort) {
 
 
-        List<UserDtoResponse> usersByFilter = userService.getUsersByFilter(
+        PagesDtoResponse<UserDtoResponse> usersByFilter = userService.getUsersByFilter(
                 userName
                 ,userLogin
                 , userLastName
                 , position
                 , course, size, page, sort);
-
-        System.out.println(usersByFilter);
-
 
         return new ResponseEntity<>(usersByFilter, HttpStatus.OK);
     }
