@@ -1,8 +1,8 @@
 package by.innowise.internship.controller;
 
 
+import by.innowise.internship.dto.UpdateUserDto;
 import by.innowise.internship.dto.UserCreateRequestDto;
-import by.innowise.internship.dto.UserDto;
 import by.innowise.internship.dto.responseDto.PagesDtoResponse;
 import by.innowise.internship.dto.responseDto.UserDtoResponse;
 import by.innowise.internship.service.UserService;
@@ -40,7 +40,6 @@ public class UserRestController {
         UserDtoResponse userById = userService.getUserById(id);
 
 
-
         return new ResponseEntity<>(userById, HttpStatus.OK);
     }
 
@@ -55,12 +54,11 @@ public class UserRestController {
 
     @PutMapping("/{id}")
     @ApiOperation("update a user by id")
-    public ResponseEntity<UserDtoResponse> updateUser(@RequestBody UserDto userDto,
-                                                      @PathVariable("id") Long id,
-                                                      @RequestParam(required = false) Long positionId,
-                                                      @RequestParam(required = false) Long courseId) {
+    public ResponseEntity<UserDtoResponse> updateUser(@RequestBody UpdateUserDto userDto,
+                                                      @PathVariable("id") Long id) {
 
-        UserDtoResponse userDtoResponse = userService.updateUser(userDto, id, positionId, courseId);
+        UserDtoResponse userDtoResponse = userService
+                .updateUser(userDto, id, userDto.getPositionId(), userDto.getCourseId());
 
         return new ResponseEntity<>(userDtoResponse, HttpStatus.OK);
     }
@@ -76,12 +74,12 @@ public class UserRestController {
 
     @GetMapping
     @ApiOperation("get all users")
-    public ResponseEntity<PagesDtoResponse<UserDtoResponse>> getAllPosition
+    public ResponseEntity<PagesDtoResponse<UserDtoResponse>> getAllUsers
             (@RequestParam(defaultValue = "5") int size,
              @RequestParam(defaultValue = "0") int page,
-             @RequestParam(required = false, defaultValue = "name") String name) {
+             @RequestParam(required = false, defaultValue = "name") String sort) {
 
-        PagesDtoResponse<UserDtoResponse> users = userService.getAll(size, page, name);
+        PagesDtoResponse<UserDtoResponse> users = userService.getAll(size, page, sort);
 
 
         return new ResponseEntity<>(users, HttpStatus.OK);
@@ -99,10 +97,9 @@ public class UserRestController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "name") String sort) {
 
-
         PagesDtoResponse<UserDtoResponse> usersByFilter = userService.getUsersByFilter(
                 userName
-                ,userLogin
+                , userLogin
                 , userLastName
                 , position
                 , course, size, page, sort);

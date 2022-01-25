@@ -1,8 +1,7 @@
 package by.innowise.internship.service.impl;
 
+import by.innowise.internship.dto.UpdateUserDto;
 import by.innowise.internship.dto.UserCreateRequestDto;
-import by.innowise.internship.dto.UserDto;
-import by.innowise.internship.dto.buildDto.Builders;
 import by.innowise.internship.dto.responseDto.PagesDtoResponse;
 import by.innowise.internship.dto.responseDto.UserDtoResponse;
 import by.innowise.internship.entity.Course;
@@ -38,7 +37,6 @@ public class UserServiceImpl implements UserService {
     private final PositionService positionService;
     private final CourseService courseService;
     private final Validation validation;
-    private final Builders builders;
 
 
     @Autowired
@@ -47,7 +45,7 @@ public class UserServiceImpl implements UserService {
                            PagesService pagesService,
                            PositionService positionService,
                            CourseService courseService,
-                           Validation validation, Builders builders) {
+                           Validation validation) {
 
         this.userRepository = userRepository;
         this.userMapper = userMapper;
@@ -55,7 +53,6 @@ public class UserServiceImpl implements UserService {
         this.positionService = positionService;
         this.courseService = courseService;
         this.validation = validation;
-        this.builders = builders;
     }
 
     @Override
@@ -88,9 +85,9 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public UserDtoResponse updateUser(UserDto userDto, Long userId, Long positionId, Long courseId) {
+    public UserDtoResponse updateUser(UpdateUserDto userDto, Long userId, Long positionId, Long courseId) {
 
-        return Optional.of(update(getUser(userId), userMapper.toEntity(userDto), positionId, courseId))
+        return Optional.of(update(getUser(userId), userMapper.toUser(userDto), positionId, courseId))
                 .map(userRepository::save)
                 .map(userMapper::toUserResponseDto)
                 .orElseThrow();

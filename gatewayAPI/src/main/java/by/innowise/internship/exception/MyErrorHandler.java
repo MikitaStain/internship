@@ -22,6 +22,7 @@ public class MyErrorHandler implements ResponseErrorHandler {
 
             } else if (response.getStatusCode()
                     .series() == CLIENT_ERROR) {
+
             }
     }
 

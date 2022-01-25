@@ -46,7 +46,7 @@ public class CourseRestController {
     public ResponseEntity<CourseDtoResponse> getCourseByID(@PathVariable("id") Long id) {
 
         CourseDtoResponse courseById = courseService.getCourseById(id);
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+
 
         return new ResponseEntity<>(courseById, HttpStatus.OK);
 
