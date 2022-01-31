@@ -1,0 +1,20 @@
+spring:
+
+  servlet:
+    multipart:
+      max-request-size: 100MB
+      max-file-size: 100MB
+      enabled: true
+
+  data:
+    mongodb:
+      database: UserPhoto
+      port: 27017
+      host: localhost
+      auto-index-creation: true
+
+
+
+server:
+  port: 8082
+
