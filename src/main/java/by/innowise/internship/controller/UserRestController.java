@@ -45,11 +45,11 @@ public class UserRestController {
 
     @PostMapping
     @ApiOperation("save a user")
-    public ResponseEntity<HttpStatus> createUser(@RequestBody UserCreateRequestDto userDto) {
+    public ResponseEntity<Long> createUser(@RequestBody UserCreateRequestDto userDto) {
 
-        userService.saveUser(userDto);
+         Long idNewUser = userService.saveUser(userDto);
 
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return new ResponseEntity<>(idNewUser, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
@@ -102,7 +102,8 @@ public class UserRestController {
                 , userLogin
                 , userLastName
                 , position
-                , course, size, page, sort);
+                , course
+                , size, page, sort);
 
         return new ResponseEntity<>(usersByFilter, HttpStatus.OK);
     }

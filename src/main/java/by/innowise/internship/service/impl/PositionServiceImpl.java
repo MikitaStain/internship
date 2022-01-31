@@ -107,6 +107,7 @@ public class PositionServiceImpl implements PositionService {
 
 
     @Override
+    @Transactional(readOnly = true)
     public PagesDtoResponse<PositionDtoResponse> getAll(int size, int page, String sort) {
 
         Page<PositionDtoResponse> allPositions =

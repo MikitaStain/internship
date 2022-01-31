@@ -14,7 +14,7 @@
             INSERT INTO application.positions(name)
             VALUES ('Computer systems manager');
 
-            INSERT INTO application.users(name)
+            INSERT INTO application.positions(name)
             VALUES ('Network architect');
 
             INSERT INTO application.positions(name)

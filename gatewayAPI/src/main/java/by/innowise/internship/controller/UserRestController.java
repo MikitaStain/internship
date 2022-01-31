@@ -122,6 +122,7 @@ public class UserRestController {
                         getUrlForFilterUsers(userName, userLogin, userLastName, position, course, size, page, sort)
                         , PagesDtoResponse.class
                 );
+
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
