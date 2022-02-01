@@ -4,18 +4,16 @@ import by.innowise.internship.dto.ImageDtoResponse;
 import by.innowise.internship.service.ImageService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("users")
+@RequestMapping("users/photo")
 @Api(value = "Image controller")
 public class ImageController {
 
@@ -26,14 +24,23 @@ public class ImageController {
         this.service = service;
     }
 
-    @PostMapping(value = "/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ApiOperation("save photo")
-    public ResponseEntity<ImageDtoResponse> saveImage(@RequestParam("file") MultipartFile multipartFile) {
+    public ResponseEntity<ObjectId> saveImage(@RequestParam(value = "file") MultipartFile multipartFile) {
 
-        ImageDtoResponse image = service.saveImage(multipartFile);
+        ObjectId objectId = service.saveImage(multipartFile);
 
 
-        return new ResponseEntity<>(image, HttpStatus.OK);
-
+        return new ResponseEntity<>(objectId, HttpStatus.OK);
     }
+
+    @GetMapping("/{id}")
+    @ApiOperation("Find image by id")
+    public ResponseEntity<ImageDtoResponse> findImage(@PathVariable("id") String id){
+
+        final ImageDtoResponse imageById = service.findImageById(id);
+
+        return new ResponseEntity<>(imageById,HttpStatus.OK);
+    }
+
 }
