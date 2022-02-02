@@ -36,11 +36,11 @@ public class ImageController {
 
     @GetMapping("/{id}")
     @ApiOperation("Find image by id")
-    public ResponseEntity<ImageDtoResponse> findImage(@PathVariable("id") String id){
+    public ResponseEntity<ImageDtoResponse> findImage(@PathVariable("id") String id) {
 
         final ImageDtoResponse imageById = service.findImageById(id);
 
-        return new ResponseEntity<>(imageById,HttpStatus.OK);
+        return new ResponseEntity<>(imageById, HttpStatus.OK);
     }
 
 }
