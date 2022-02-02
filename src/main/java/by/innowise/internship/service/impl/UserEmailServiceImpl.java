@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,9 +49,6 @@ public class UserEmailServiceImpl implements UserEmailService {
 
         email.setUser(userService.getUser(userId));
 
-        Optional.of(emailMapper.toEntity(emailDto))
-                .ifPresent(email1 -> email.setUser(userService.getUser(userId)));
-
         return emailMapper.toEmailResponseDto(emailRepository.save(email));
     }
 
@@ -66,7 +62,6 @@ public class UserEmailServiceImpl implements UserEmailService {
 
 
     @Override
-    @Transactional(readOnly = true)
     public List<EmailDtoResponse> getAllEmailForUser(Long userId) {
 
         List<EmailDtoResponse> collect = userService.getUser(userId)
@@ -123,7 +118,7 @@ public class UserEmailServiceImpl implements UserEmailService {
 
             if (email.getId().equals(emailId)) {
 
-                emailRepository.delete(email);
+                emailRepository.deleteById(emailId);
 
                 return;
             }

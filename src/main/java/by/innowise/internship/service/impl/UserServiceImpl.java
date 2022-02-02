@@ -140,6 +140,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PagesDtoResponse<UserDtoResponse> getAll(int size, int page, String sort) {
 
         Page<UserDtoResponse> allUsers = userRepository

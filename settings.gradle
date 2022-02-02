@@ -1,2 +1,3 @@
 rootProject.name = 'userService'
+include 'userPhotoService'
 

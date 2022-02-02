@@ -12,7 +12,11 @@ import java.util.regex.Pattern;
 @Component
 public class ValidationImpl implements Validation {
 
-    private final String REG_EMAIL = "^([a-z0-9_-]+\\.)*[a-z0-9_-]+@[a-z0-9_-]+(\\.[a-z0-9_-]+)*\\.[a-z]{2,6}$";
+    private static final String REG_EMAIL;
+
+    static {
+        REG_EMAIL = "^([a-z0-9_-]+\\.)*[a-z0-9_-]+@[a-z0-9_-]+(\\.[a-z0-9_-]+)*\\.[a-z]{2,6}$";
+    }
 
     @Override
     public void checkParameter(String name) {

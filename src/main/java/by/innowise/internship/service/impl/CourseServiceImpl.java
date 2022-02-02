@@ -95,7 +95,8 @@ public class CourseServiceImpl implements CourseService {
 
 
     @Override
-    public PagesDtoResponse getAll(int size, int page, String sort) {
+    @Transactional(readOnly = true)
+    public PagesDtoResponse<CourseDtoResponse> getAll(int size, int page, String sort) {
 
         Page<CourseDtoResponse> allPositions = courseRepository
                 .findAll(pagesService.getPage(size, page, sort))
