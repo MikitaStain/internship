@@ -3,9 +3,8 @@ package by.innowise.internship.service;
 import by.innowise.internship.dto.CourseDto;
 import by.innowise.internship.dto.responseDto.CourseDtoResponse;
 import by.innowise.internship.dto.responseDto.PagesDtoResponse;
-import by.innowise.internship.entity.Course;
 
-public interface CourseService {
+public interface CourseService extends CourseGlobalService {
 
     CourseDtoResponse getCourseById(Long id);
 
@@ -17,5 +16,5 @@ public interface CourseService {
 
     PagesDtoResponse<CourseDtoResponse> getAll(int size, int page, String sort);
 
-    Course getCourse(Long id);
+
 }

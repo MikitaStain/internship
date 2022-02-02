@@ -4,9 +4,8 @@ import by.innowise.internship.dto.UpdateUserDto;
 import by.innowise.internship.dto.UserCreateRequestDto;
 import by.innowise.internship.dto.responseDto.PagesDtoResponse;
 import by.innowise.internship.dto.responseDto.UserDtoResponse;
-import by.innowise.internship.entity.User;
 
-public interface UserService {
+public interface UserService extends UserGlobalService {
 
     UserDtoResponse getUserById(Long id);
 
@@ -17,8 +16,6 @@ public interface UserService {
     void deleteUser(Long id);
 
     PagesDtoResponse<UserDtoResponse> getAll(int size, int page, String sort);
-
-    User getUser(Long id);
 
     PagesDtoResponse<UserDtoResponse> getUsersByFilter(String userName,
                                                        String userLogin,

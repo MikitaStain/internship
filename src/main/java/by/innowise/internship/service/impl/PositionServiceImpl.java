@@ -6,7 +6,6 @@ import by.innowise.internship.dto.responseDto.PositionDtoResponse;
 import by.innowise.internship.entity.Position;
 import by.innowise.internship.exceptions.NoCreateException;
 import by.innowise.internship.exceptions.NoDataFoundException;
-import by.innowise.internship.exceptions.NoUpdateException;
 import by.innowise.internship.exceptions.ResourceNotFoundException;
 import by.innowise.internship.mappers.PositionMapper;
 import by.innowise.internship.repository.dao.PositionRepository;
@@ -74,28 +73,21 @@ public class PositionServiceImpl implements PositionService {
     @Override
     public PositionDtoResponse updatePosition(PositionDTO positionDTO, Long id) {
 
-        if (!positionDTO.getName().isBlank()) {
+        validation.checkParameter(positionDTO.getName());
+        validation.checkDuplicateParameter(positionsName(), positionDTO.getName());
 
-            Position positionById = getPosition(id);
-            Position position = positionMapper.toPositionEntity(positionDTO);
+        Position positionById = getPosition(id);
 
-            positionById.setName(position.getName());
-            positionRepository.save(positionById);
+        positionById.setName(positionDTO.getName());
 
-            return positionMapper
-                    .toPositionResponseDto(positionById);
-        }
-
-        throw new NoUpdateException("Position by id: " + id + " cannot be update to name: "
-                + positionDTO.getName());
+        return positionMapper
+                .toPositionResponseDto(positionRepository.save(positionById));
     }
 
     @Override
     public void deletePosition(Long id) {
 
-        Position position = getPosition(id);
-
-        positionRepository.delete(position);
+        positionRepository.delete(getPosition(id));
     }
 
     @Override

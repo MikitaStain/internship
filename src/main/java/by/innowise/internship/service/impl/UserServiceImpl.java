@@ -12,15 +12,14 @@ import by.innowise.internship.exceptions.ResourceNotFoundException;
 import by.innowise.internship.mappers.UserMapper;
 import by.innowise.internship.repository.dao.UserRepository;
 import by.innowise.internship.repository.specifications.UserSpecifications;
-import by.innowise.internship.service.CourseService;
-import by.innowise.internship.service.PositionService;
+import by.innowise.internship.service.CourseGlobalService;
+import by.innowise.internship.service.PositionGlobalService;
 import by.innowise.internship.service.UserService;
 import by.innowise.internship.util.Validation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -34,8 +33,8 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PagesService pagesService;
-    private final PositionService positionService;
-    private final CourseService courseService;
+    private final PositionGlobalService positionService;
+    private final CourseGlobalService courseService;
     private final Validation validation;
 
 
@@ -43,8 +42,8 @@ public class UserServiceImpl implements UserService {
     public UserServiceImpl(UserRepository userRepository,
                            UserMapper userMapper,
                            PagesService pagesService,
-                           PositionService positionService,
-                           CourseService courseService,
+                           PositionGlobalService positionService,
+                           CourseGlobalService courseService,
                            Validation validation) {
 
         this.userRepository = userRepository;
@@ -134,9 +133,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(Long id) {
 
-        User user = getUser(id);
-
-        userRepository.delete(user);
+        userRepository.delete(getUser(id));
     }
 
     @Override
@@ -155,6 +152,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PagesDtoResponse<UserDtoResponse> getUsersByFilter(String userName,
                                                               String userLogin,
                                                               String userLastName,
@@ -190,7 +188,7 @@ public class UserServiceImpl implements UserService {
                 .and(UserSpecifications.likeCourse(course));
     }
 
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    @Override
     public User getUser(Long id) {
 
         return userRepository.findById(id)

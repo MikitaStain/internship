@@ -38,7 +38,6 @@ public class CourseRestController {
 
         CourseDtoResponse courseById = courseService.getCourseById(id);
 
-
         return new ResponseEntity<>(courseById, HttpStatus.OK);
 
     }

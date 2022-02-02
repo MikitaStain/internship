@@ -1,6 +1,8 @@
 package by.innowise.internship.entity;
 
 import lombok.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.util.List;
@@ -31,7 +33,8 @@ public class User {
     @Column(name = "last_name")
     private String lastName;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
+    @Fetch(FetchMode.SUBSELECT)
     private List<Email> emails;
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -40,6 +43,7 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "course_id")
     )
     @ToString.Exclude
+    @Fetch(FetchMode.SUBSELECT)
     private List<Course> courses;
 
     @ManyToOne(fetch = FetchType.LAZY)
