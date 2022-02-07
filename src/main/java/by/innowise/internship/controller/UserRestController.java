@@ -38,7 +38,6 @@ public class UserRestController {
     public ResponseEntity<UserDtoResponse> getUser(@PathVariable("id") Long id) {
 
         UserDtoResponse userById = userService.getUserById(id);
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
         return new ResponseEntity<>(userById, HttpStatus.OK);
     }
@@ -48,7 +47,6 @@ public class UserRestController {
     public ResponseEntity<Long> createUser(@RequestBody UserCreateRequestDto userDto) {
 
          Long idNewUser = userService.saveUser(userDto);
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
         return new ResponseEntity<>(idNewUser, HttpStatus.CREATED);
     }
@@ -60,7 +58,6 @@ public class UserRestController {
 
         UserDtoResponse userDtoResponse = userService
                 .updateUser(userDto, id, userDto.getPositionId(), userDto.getCourseId());
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
         return new ResponseEntity<>(userDtoResponse, HttpStatus.OK);
     }
@@ -70,7 +67,6 @@ public class UserRestController {
     public ResponseEntity<HttpStatus> deleteUser(@PathVariable("id") Long id) {
 
         userService.deleteUser(id);
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -83,7 +79,6 @@ public class UserRestController {
              @RequestParam(required = false, defaultValue = "name") String sort) {
 
         PagesDtoResponse<UserDtoResponse> users = userService.getAll(size, page, sort);
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
 
         return new ResponseEntity<>(users, HttpStatus.OK);
@@ -108,7 +103,6 @@ public class UserRestController {
                 , position
                 , course
                 , size, page, sort);
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
         return new ResponseEntity<>(usersByFilter, HttpStatus.OK);
     }

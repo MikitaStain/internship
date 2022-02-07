@@ -3,11 +3,11 @@ package by.innowise.internship.service.impl;
 import by.innowise.internship.dto.ImageDtoResponse;
 import by.innowise.internship.exceptions.EmptyFileException;
 import by.innowise.internship.exceptions.FileNotAvailableException;
+import by.innowise.internship.exceptions.NotAvailableContentException;
 import by.innowise.internship.service.ImageService;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.client.gridfs.model.GridFSFile;
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -33,20 +34,19 @@ public class ImageServiceImpl implements ImageService {
 
 
     @Override
-    public ObjectId saveImage(MultipartFile multipartFile) {
+    public String saveImage(MultipartFile multipartFile, Long userId) {
 
         if (multipartFile.isEmpty()) {
 
-            //пустой файл
             throw new EmptyFileException("File is empty");
         }
 
         try (InputStream inputStream = multipartFile.getInputStream()) {
 
             DBObject metadata = new BasicDBObject();
-            metadata.put("user", "loginUser");
+            metadata.put("userId", userId);
 
-            return gridFsTemplate.store(inputStream, multipartFile.getName(), metadata);
+            return gridFsTemplate.store(inputStream, multipartFile.getName(), metadata).toHexString();
 
 
         } catch (IOException e) {
@@ -55,11 +55,22 @@ public class ImageServiceImpl implements ImageService {
         }
     }
 
+    @Override
+    public void deleteImage(String id, Long userId) {
+
+        GridFSFile gridFsFile = getGridFsFile(id);
+        checkUserIdFromData(userId,gridFsFile);
+
+        gridFsTemplate.delete(new Query(Criteria.where("_id").is(id)));
+    }
+
 
     @Override
-    public ImageDtoResponse findImageById(String idImage) {
+    public ImageDtoResponse findImageById(String idImage, Long userId) {
 
-        GridFsResource resource = getResource(getGridFsFile(idImage));
+        GridFSFile gridFsFile = getGridFsFile(idImage);
+        checkUserIdFromData(userId,gridFsFile);
+        GridFsResource resource = getResource(gridFsFile);
 
         try (InputStream inputStream = resource.getInputStream()) {
 
@@ -68,16 +79,16 @@ public class ImageServiceImpl implements ImageService {
         } catch (IOException e) {
             throw new FileNotAvailableException("File available");
         }
-
     }
+
 
     private GridFSFile getGridFsFile(String id) {
 
         return Optional.ofNullable(gridFsTemplate.findOne(new Query(Criteria.where("_id").is(id))))
                 .orElseThrow(
                         () -> new FileNotAvailableException("File by id: " + id + " not found"));
-
     }
+
 
     private ImageDtoResponse getImageDtoResponse(InputStream inputStream, String id, String name) {
 
@@ -93,8 +104,18 @@ public class ImageServiceImpl implements ImageService {
         }
     }
 
+
     private GridFsResource getResource(GridFSFile file) {
 
         return gridFsTemplate.getResource(file);
+    }
+
+
+    private void checkUserIdFromData(Long userId, GridFSFile gridFSFile){
+
+        if (!Objects.requireNonNull(gridFSFile.getMetadata()).containsValue(userId)) {
+
+            throw new NotAvailableContentException("Content not available for user with id " + userId);
+        }
     }
 }
