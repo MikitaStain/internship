@@ -1,12 +1,9 @@
 spring:
 
-  logging:
-    level:
-      transaction: DEBUG
-
   liquibase:
     enabled: true
     change-log: classpath:/db/changelog/db.changelog-root.xml
+    database-change-log-lock-table: crm
 
 
   jpa:

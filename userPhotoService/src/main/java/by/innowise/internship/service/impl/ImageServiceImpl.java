@@ -48,10 +48,9 @@ public class ImageServiceImpl implements ImageService {
 
             return gridFsTemplate.store(inputStream, multipartFile.getName(), metadata).toHexString();
 
-
         } catch (IOException e) {
-            throw new FileNotAvailableException("File " + multipartFile.getName() + " available");
 
+            throw new FileNotAvailableException("File " + multipartFile.getName() + "don`t available");
         }
     }
 
@@ -77,6 +76,7 @@ public class ImageServiceImpl implements ImageService {
             return getImageDtoResponse(inputStream, String.valueOf(resource.getId()), resource.getFilename());
 
         } catch (IOException e) {
+
             throw new FileNotAvailableException("File available");
         }
     }
