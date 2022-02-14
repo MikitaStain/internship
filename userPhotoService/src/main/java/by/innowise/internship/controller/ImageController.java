@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/users/{id_user}/photo")
 @Api(value = "Image controller")
@@ -53,4 +55,13 @@ public class ImageController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @GetMapping
+    @ApiOperation("Find all photo for user")
+    public ResponseEntity<List<ImageDtoResponse>> getAll(@PathVariable("id_user") Long userId){
+
+        List<ImageDtoResponse> allImagesForUser = service.findAllImagesForUser(userId);
+
+        return new ResponseEntity<>(allImagesForUser, HttpStatus.OK);
+
+    }
 }

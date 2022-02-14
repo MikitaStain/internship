@@ -19,6 +19,7 @@ import by.innowise.internship.util.Validation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +37,7 @@ public class UserServiceImpl implements UserService {
     private final PositionGlobalService positionService;
     private final CourseGlobalService courseService;
     private final Validation validation;
+    private final KafkaTemplate<String, String> kafkaTemplate;
 
 
     @Autowired
@@ -44,7 +46,8 @@ public class UserServiceImpl implements UserService {
                            PagesService pagesService,
                            PositionGlobalService positionService,
                            CourseGlobalService courseService,
-                           Validation validation) {
+                           Validation validation,
+                           KafkaTemplate<String, String> kafkaTemplate) {
 
         this.userRepository = userRepository;
         this.userMapper = userMapper;
@@ -52,6 +55,7 @@ public class UserServiceImpl implements UserService {
         this.positionService = positionService;
         this.courseService = courseService;
         this.validation = validation;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     @Override
@@ -134,6 +138,7 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(Long id) {
 
         userRepository.delete(getUser(id));
+        sendMessage(String.valueOf(id));
     }
 
     @Override
@@ -194,5 +199,10 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(id)
                 .orElseThrow(
                         () -> new ResourceNotFoundException("user by id " + id + " not found"));
+    }
+
+    private void sendMessage(String message) {
+
+        kafkaTemplate.send("delete", message);
     }
 }
