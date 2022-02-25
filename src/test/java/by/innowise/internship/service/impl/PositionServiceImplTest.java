@@ -65,7 +65,7 @@ class PositionServiceImplTest {
     private final Position expectedPosition = buildPosition();
     private final PositionDTO expectedPositionDto = buildPositionDto();
     private final Pageable expectedPageable = buildPageable();
-    private final PagesDtoResponse<PositionDtoResponse> expectedPagesDtoResponse = buildPagesDtoResponse();
+    private final PagesDtoResponse<Object> expectedPagesDtoResponse = buildPagesDtoResponse();
 
     /**
      * {@link PositionServiceImpl#getPositionById(Long)}

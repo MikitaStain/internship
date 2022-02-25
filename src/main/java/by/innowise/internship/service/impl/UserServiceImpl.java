@@ -3,8 +3,11 @@ package by.innowise.internship.service.impl;
 import by.innowise.internship.dto.UpdateUserDto;
 import by.innowise.internship.dto.UserCreateRequestDto;
 import by.innowise.internship.dto.responseDto.PagesDtoResponse;
+import by.innowise.internship.dto.responseDto.UserDtoForAuthResponse;
 import by.innowise.internship.dto.responseDto.UserDtoResponse;
 import by.innowise.internship.entity.Course;
+import by.innowise.internship.entity.Role;
+import by.innowise.internship.entity.RoleEnum;
 import by.innowise.internship.entity.User;
 import by.innowise.internship.exceptions.NoCreateException;
 import by.innowise.internship.exceptions.NoDataFoundException;
@@ -74,9 +77,18 @@ public class UserServiceImpl implements UserService {
 
         return Optional.of(userDto)
                 .map(userMapper::create)
+                .map(this::setRole)
                 .map(userRepository::save)
                 .map(User::getId)
                 .orElseThrow(() -> new NoCreateException("User can not created"));
+    }
+
+    private User setRole(User user) {
+
+        Role role = new Role();
+        role.setId(RoleEnum.ROLE_USER.getValue());
+        user.setRole(role);
+        return user;
     }
 
     private List<String> userLogins() {
@@ -199,6 +211,27 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(id)
                 .orElseThrow(
                         () -> new ResourceNotFoundException("user by id " + id + " not found"));
+    }
+
+    @Override
+    public UserDtoResponse findByLogin(String login) {
+        return Optional
+                .ofNullable(userRepository.findByLogin(login))
+                .map(userMapper::toUserResponseDto)
+                .orElseThrow(
+                        () -> new NoDataFoundException("user with login " + login + " does not exist")
+                );
+    }
+
+    @Override
+    public UserDtoForAuthResponse findByLoginAndPassword(String login, String password) {
+
+        return Optional
+                .ofNullable(userRepository.findByLoginAndPassword(login, password))
+                .map(userMapper::toAuth)
+                .orElseThrow(
+                        () -> new NoDataFoundException("data user does not exist")
+                );
     }
 
     private void sendMessage(String message) {

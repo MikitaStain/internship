@@ -3,6 +3,7 @@ package by.innowise.internship.service;
 import by.innowise.internship.dto.UpdateUserDto;
 import by.innowise.internship.dto.UserCreateRequestDto;
 import by.innowise.internship.dto.responseDto.PagesDtoResponse;
+import by.innowise.internship.dto.responseDto.UserDtoForAuthResponse;
 import by.innowise.internship.dto.responseDto.UserDtoResponse;
 
 public interface UserService extends UserGlobalService {
@@ -25,4 +26,8 @@ public interface UserService extends UserGlobalService {
                                                        int size,
                                                        int page,
                                                        String sort);
+
+    UserDtoResponse findByLogin(String login);
+
+    UserDtoForAuthResponse findByLoginAndPassword(String login, String password);
 }

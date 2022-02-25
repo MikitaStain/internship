@@ -4,6 +4,7 @@ package by.innowise.internship.controller;
 import by.innowise.internship.dto.UpdateUserDto;
 import by.innowise.internship.dto.UserCreateRequestDto;
 import by.innowise.internship.dto.responseDto.PagesDtoResponse;
+import by.innowise.internship.dto.responseDto.UserDtoForAuthResponse;
 import by.innowise.internship.dto.responseDto.UserDtoResponse;
 import by.innowise.internship.service.UserService;
 import io.swagger.annotations.Api;
@@ -46,7 +47,7 @@ public class UserRestController {
     @ApiOperation("save a user")
     public ResponseEntity<Long> createUser(@RequestBody UserCreateRequestDto userDto) {
 
-         Long idNewUser = userService.saveUser(userDto);
+        Long idNewUser = userService.saveUser(userDto);
 
         return new ResponseEntity<>(idNewUser, HttpStatus.CREATED);
     }
@@ -107,5 +108,23 @@ public class UserRestController {
         return new ResponseEntity<>(usersByFilter, HttpStatus.OK);
     }
 
+    @GetMapping("/login")
+    @ApiOperation("Find user by login")
+    public ResponseEntity<UserDtoResponse> getUserByLogin(@RequestParam String login) {
 
+        UserDtoResponse byLogin = userService.findByLogin(login);
+
+        return new ResponseEntity<>(byLogin, HttpStatus.OK);
+    }
+
+    @GetMapping("/loginAndPassword")
+    @ApiOperation("Find user by login and password")
+    public ResponseEntity<UserDtoForAuthResponse> getUserByLoginAndPassword(@RequestParam String login,
+                                                                            @RequestParam String password) {
+
+        UserDtoForAuthResponse userByLoginAndPassword =
+                userService.findByLoginAndPassword(login, password);
+
+        return new ResponseEntity<>(userByLoginAndPassword, HttpStatus.OK);
+    }
 }

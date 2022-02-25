@@ -1,7 +1,7 @@
 package by.innowise.internship.dto.responseDto;
 
-import by.innowise.internship.dto.CourseDto;
-import by.innowise.internship.dto.PositionDTO;
+import by.innowise.internship.dto.requestDto.CourseDto;
+import by.innowise.internship.dto.requestDto.PositionDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,6 +28,4 @@ public class UserDtoResponse {
     private List<CourseDto> courses;
 
     private PositionDTO position;
-
-    private RoleDtoResponse role;
 }

@@ -2,6 +2,7 @@ package by.innowise.internship.mappers;
 
 import by.innowise.internship.dto.UpdateUserDto;
 import by.innowise.internship.dto.UserCreateRequestDto;
+import by.innowise.internship.dto.responseDto.UserDtoForAuthResponse;
 import by.innowise.internship.dto.responseDto.UserDtoResponse;
 import by.innowise.internship.entity.User;
 import org.mapstruct.Mapper;
@@ -14,5 +15,7 @@ public interface UserMapper {
     User create(UserCreateRequestDto userCreateRequestDto);
 
     UserDtoResponse toUserResponseDto(User user);
+
+    UserDtoForAuthResponse toAuth(User user);
 
 }

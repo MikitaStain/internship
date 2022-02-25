@@ -8,7 +8,7 @@
       http://www.liquibase.org/xml/ns/pro
       http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.6.xsd ">
 
-    <changeSet id="1" author="mikita">
+    <changeSet id="2" author="mikita">
 
         <comment>Table Positions</comment>
 
@@ -28,8 +28,27 @@
 
     </changeSet>
 
+    <changeSet id="3" author="mikita">
 
-    <changeSet id="2" author="mikita">
+        <comment>Table roles</comment>
+
+        <sql>
+            CREATE TABLE IF NOT EXISTS application.roles
+            (
+            role_id bigserial NOT NULL,
+            role_name varchar(255) NOT NULL,
+            CONSTRAINT roles_pkey PRIMARY KEY (role_id)
+            )
+
+        </sql>
+
+        <rollback>
+            DROP TABLE roles;
+        </rollback>
+    </changeSet>
+
+
+    <changeSet id="4" author="mikita">
 
         <comment>Table users</comment>
 
@@ -38,9 +57,11 @@
             (
             user_id bigserial NOT NULL,
             last_name character varying(255),
-            login varchar(255) UNIQUE,
+            login varchar(255) UNIQUE NOT NULL,
             name varchar(255),
-            password varchar(255),
+            role_id bigint NOT NULL
+            references application.roles,
+            password varchar(255) NOT NULL,
             position_id bigint
             references application.positions,
             CONSTRAINT users_pkey PRIMARY KEY (user_id)
@@ -53,7 +74,7 @@
 
     </changeSet>
 
-    <changeSet id="3" author="mikita">
+    <changeSet id="5" author="mikita">
 
         <comment>Table emails</comment>
 
@@ -76,7 +97,7 @@
     </changeSet>
 
 
-    <changeSet id="4" author="mikita">
+    <changeSet id="6" author="mikita">
 
         <comment>Table courses</comment>
 
@@ -96,7 +117,7 @@
     </changeSet>
 
 
-    <changeSet id="5" author="mikita">
+    <changeSet id="7" author="mikita">
 
         <comment>Table user_courses</comment>
 
@@ -118,5 +139,6 @@
         </rollback>
 
     </changeSet>
+
 
 </databaseChangeLog>

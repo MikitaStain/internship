@@ -1,9 +1,7 @@
 spring:
-
-  security:
-    user:
-      name: user
-      password: user
+  cloud:
+    compatibility-verifier:
+      enabled: false
 
   servlet:
     multipart:
@@ -12,5 +10,9 @@ spring:
       enabled: true
 
 server:
-  port: 8081
+  port: 8083
+
+feign:
+  httpclient:
+    connection-timeout: 5000
 
