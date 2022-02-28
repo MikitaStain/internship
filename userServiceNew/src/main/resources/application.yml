@@ -1,0 +1,29 @@
+spring:
+
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-root.xml
+
+
+  jpa:
+    open-in-view: true
+    database-platform: org.hibernate.dialect.PostgreSQL10Dialect
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        format_sql: true
+
+  application:
+    name: user-work
+
+  datasource:
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/crm
+    username: postgres
+    password: 7403663
+
+
+server:
+  port: 8080
