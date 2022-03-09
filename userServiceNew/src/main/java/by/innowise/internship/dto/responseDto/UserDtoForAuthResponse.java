@@ -11,7 +11,11 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UserDtoForAuthResponse {
 
+    private Long id;
+
     private String login;
+
+    private String password;
 
     private RoleDtoResponse role;
 }

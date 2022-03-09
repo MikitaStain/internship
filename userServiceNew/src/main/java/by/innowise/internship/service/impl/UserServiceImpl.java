@@ -214,23 +214,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDtoResponse findByLogin(String login) {
+    public UserDtoForAuthResponse findByLogin(String login) {
         return Optional
                 .ofNullable(userRepository.findByLogin(login))
-                .map(userMapper::toUserResponseDto)
+                .map(userMapper::userDtoForAuthResponse)
                 .orElseThrow(
                         () -> new NoDataFoundException("user with login " + login + " does not exist")
-                );
-    }
-
-    @Override
-    public UserDtoForAuthResponse findByLoginAndPassword(String login, String password) {
-
-        return Optional
-                .ofNullable(userRepository.findByLoginAndPassword(login, password))
-                .map(userMapper::toAuth)
-                .orElseThrow(
-                        () -> new NoDataFoundException("data user does not exist")
                 );
     }
 

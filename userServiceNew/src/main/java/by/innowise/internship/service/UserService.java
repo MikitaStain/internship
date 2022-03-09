@@ -27,7 +27,5 @@ public interface UserService extends UserGlobalService {
                                                        int page,
                                                        String sort);
 
-    UserDtoResponse findByLogin(String login);
-
-    UserDtoForAuthResponse findByLoginAndPassword(String login, String password);
+    UserDtoForAuthResponse findByLogin(String login);
 }

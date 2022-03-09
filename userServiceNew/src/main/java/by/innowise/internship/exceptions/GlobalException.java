@@ -28,7 +28,7 @@ public class GlobalException {
         errorObject.setTimestamp(CalendarUtils.
                 convertMilliSecondsToFormattedDate(System.currentTimeMillis()));
 
-        return new ResponseEntity<>(errorObject, HttpStatus.OK);
+        return new ResponseEntity<>(errorObject, HttpStatus.NO_CONTENT);
     }
 
     @ExceptionHandler(NoCreateException.class)

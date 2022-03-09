@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,6 +34,7 @@ public class UserPhotoRestController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ApiOperation("gateway method get for user photo")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
     public ResponseEntity<String> addPhotoForUser(@PathVariable("id_user") Long userId,
                                                   @RequestParam MultipartFile multipartFile) {
 
@@ -44,6 +46,7 @@ public class UserPhotoRestController {
 
     @GetMapping("/{id_photo}")
     @ApiOperation("gateway method find image by id")
+    @PreAuthorize(value = "hasRole('ROLE_ADMIN') or #userId.equals(authentication.principal.id)")
     public ResponseEntity<ImageDtoResponse> findPhotoForUser(@PathVariable ("id_user") Long userId,
                                                              @PathVariable("id_photo") String photoId){
 
@@ -55,6 +58,7 @@ public class UserPhotoRestController {
 
     @DeleteMapping("/{id_photo}")
     @ApiOperation("gateway method delete image from user")
+    @PreAuthorize(value = "hasRole('ROLE_ADMIN') or #userId.equals(authentication.principal.id)")
     public ResponseEntity<HttpStatus> deleteImageForUser(@PathVariable ("id_user") Long userId,
                                                          @PathVariable("id_photo") String photoId){
 

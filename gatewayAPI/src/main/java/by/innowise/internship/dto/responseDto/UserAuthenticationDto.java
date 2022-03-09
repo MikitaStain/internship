@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserDtoForAuthResponse {
+public class UserAuthenticationDto {
 
     private Long id;
 
