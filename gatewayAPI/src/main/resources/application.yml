@@ -1,0 +1,16 @@
+spring:
+
+  security:
+    user:
+      name: user
+      password: user
+
+  servlet:
+    multipart:
+      max-request-size: 100MB
+      max-file-size: 100MB
+      enabled: true
+
+server:
+  port: 8081
+

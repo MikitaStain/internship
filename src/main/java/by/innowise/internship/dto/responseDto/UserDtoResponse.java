@@ -28,4 +28,6 @@ public class UserDtoResponse {
     private List<CourseDto> courses;
 
     private PositionDTO position;
+
+    private RoleDtoResponse role;
 }

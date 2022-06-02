@@ -1,24 +1,29 @@
 package by.innowise.internship.service.impl;
 
+import by.innowise.internship.dto.UpdateUserDto;
 import by.innowise.internship.dto.UserCreateRequestDto;
-import by.innowise.internship.dto.UserDto;
 import by.innowise.internship.dto.responseDto.PagesDtoResponse;
+import by.innowise.internship.dto.responseDto.UserDtoForAuthResponse;
 import by.innowise.internship.dto.responseDto.UserDtoResponse;
 import by.innowise.internship.entity.Course;
+import by.innowise.internship.entity.Role;
+import by.innowise.internship.entity.RoleEnum;
 import by.innowise.internship.entity.User;
 import by.innowise.internship.exceptions.NoCreateException;
 import by.innowise.internship.exceptions.NoDataFoundException;
 import by.innowise.internship.exceptions.ResourceNotFoundException;
 import by.innowise.internship.mappers.UserMapper;
 import by.innowise.internship.repository.dao.UserRepository;
-import by.innowise.internship.service.CourseService;
-import by.innowise.internship.service.PositionService;
+import by.innowise.internship.repository.specifications.UserSpecifications;
+import by.innowise.internship.service.CourseGlobalService;
+import by.innowise.internship.service.PositionGlobalService;
 import by.innowise.internship.service.UserService;
 import by.innowise.internship.util.Validation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -32,18 +37,20 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PagesService pagesService;
-    private final PositionService positionService;
-    private final CourseService courseService;
+    private final PositionGlobalService positionService;
+    private final CourseGlobalService courseService;
     private final Validation validation;
+    private final KafkaTemplate<String, String> kafkaTemplate;
 
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository,
                            UserMapper userMapper,
                            PagesService pagesService,
-                           PositionService positionService,
-                           CourseService courseService,
-                           Validation validation) {
+                           PositionGlobalService positionService,
+                           CourseGlobalService courseService,
+                           Validation validation,
+                           KafkaTemplate<String, String> kafkaTemplate) {
 
         this.userRepository = userRepository;
         this.userMapper = userMapper;
@@ -51,6 +58,7 @@ public class UserServiceImpl implements UserService {
         this.positionService = positionService;
         this.courseService = courseService;
         this.validation = validation;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     @Override
@@ -69,9 +77,18 @@ public class UserServiceImpl implements UserService {
 
         return Optional.of(userDto)
                 .map(userMapper::create)
+                .map(this::setRole)
                 .map(userRepository::save)
                 .map(User::getId)
                 .orElseThrow(() -> new NoCreateException("User can not created"));
+    }
+
+    private User setRole(User user) {
+
+        Role role = new Role();
+        role.setId(RoleEnum.ROLE_USER.getValue());
+        user.setRole(role);
+        return user;
     }
 
     private List<String> userLogins() {
@@ -83,9 +100,9 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public UserDtoResponse updateUser(UserDto userDto, Long userId, Long positionId, Long courseId) {
+    public UserDtoResponse updateUser(UpdateUserDto userDto, Long userId, Long positionId, Long courseId) {
 
-        return Optional.of(update(getUser(userId), userMapper.toEntity(userDto), positionId, courseId))
+        return Optional.of(update(getUser(userId), userMapper.toUser(userDto), positionId, courseId))
                 .map(userRepository::save)
                 .map(userMapper::toUserResponseDto)
                 .orElseThrow();
@@ -132,12 +149,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(Long id) {
 
-        User user = getUser(id);
-
-        userRepository.delete(user);
+        userRepository.delete(getUser(id));
+        sendMessage(String.valueOf(id));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PagesDtoResponse<UserDtoResponse> getAll(int size, int page, String sort) {
 
         Page<UserDtoResponse> allUsers = userRepository
@@ -151,12 +168,74 @@ public class UserServiceImpl implements UserService {
         return pagesService.getPagesDtoResponse(size, page, sort, allUsers.getContent());
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public PagesDtoResponse<UserDtoResponse> getUsersByFilter(String userName,
+                                                              String userLogin,
+                                                              String userLastName,
+                                                              String position,
+                                                              String course,
+                                                              int size,
+                                                              int page,
+                                                              String sort) {
 
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+        Page<UserDtoResponse> usersFilter = userRepository
+                .findAll(getSpecification(userName, userLogin, userLastName, position, course)
+                        , pagesService.getPage(size, page, sort)).map(userMapper::toUserResponseDto);
+
+
+        if (usersFilter.isEmpty()) {
+
+            throw new NoDataFoundException("Users not found");
+        }
+
+        return pagesService.getPagesDtoResponse(size, page, sort, usersFilter.getContent());
+    }
+
+    private Specification<User> getSpecification(String userName,
+                                                 String userLogin,
+                                                 String userLastName,
+                                                 String position,
+                                                 String course) {
+
+        return UserSpecifications.likeName(userName)
+                .and(UserSpecifications.likeLogin(userLogin))
+                .and(UserSpecifications.likeLastName(userLastName))
+                .and(UserSpecifications.likePosition(position))
+                .and(UserSpecifications.likeCourse(course));
+    }
+
+    @Override
     public User getUser(Long id) {
 
         return userRepository.findById(id)
                 .orElseThrow(
                         () -> new ResourceNotFoundException("user by id " + id + " not found"));
+    }
+
+    @Override
+    public UserDtoResponse findByLogin(String login) {
+        return Optional
+                .ofNullable(userRepository.findByLogin(login))
+                .map(userMapper::toUserResponseDto)
+                .orElseThrow(
+                        () -> new NoDataFoundException("user with login " + login + " does not exist")
+                );
+    }
+
+    @Override
+    public UserDtoForAuthResponse findByLoginAndPassword(String login, String password) {
+
+        return Optional
+                .ofNullable(userRepository.findByLoginAndPassword(login, password))
+                .map(userMapper::toAuth)
+                .orElseThrow(
+                        () -> new NoDataFoundException("data user does not exist")
+                );
+    }
+
+    private void sendMessage(String message) {
+
+        kafkaTemplate.send("delete", message);
     }
 }

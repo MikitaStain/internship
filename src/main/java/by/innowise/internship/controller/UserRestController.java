@@ -1,9 +1,10 @@
 package by.innowise.internship.controller;
 
 
+import by.innowise.internship.dto.UpdateUserDto;
 import by.innowise.internship.dto.UserCreateRequestDto;
-import by.innowise.internship.dto.UserDto;
 import by.innowise.internship.dto.responseDto.PagesDtoResponse;
+import by.innowise.internship.dto.responseDto.UserDtoForAuthResponse;
 import by.innowise.internship.dto.responseDto.UserDtoResponse;
 import by.innowise.internship.service.UserService;
 import io.swagger.annotations.Api;
@@ -13,9 +14,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -44,21 +45,20 @@ public class UserRestController {
 
     @PostMapping
     @ApiOperation("save a user")
-    public ResponseEntity<HttpStatus> createUser(@RequestBody UserCreateRequestDto userDto) {
+    public ResponseEntity<Long> createUser(@RequestBody UserCreateRequestDto userDto) {
 
-        userService.saveUser(userDto);
+        Long idNewUser = userService.saveUser(userDto);
 
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return new ResponseEntity<>(idNewUser, HttpStatus.CREATED);
     }
 
-    @PatchMapping("/{id}/")
+    @PutMapping("/{id}")
     @ApiOperation("update a user by id")
-    public ResponseEntity<UserDtoResponse> updateUser(@RequestBody UserDto userDto,
-                                                      @PathVariable("id") Long id,
-                                                      @RequestParam(required = false) Long positionId,
-                                                      @RequestParam(required = false) Long courseId) {
+    public ResponseEntity<UserDtoResponse> updateUser(@RequestBody UpdateUserDto userDto,
+                                                      @PathVariable("id") Long id) {
 
-        UserDtoResponse userDtoResponse = userService.updateUser(userDto, id, positionId, courseId);
+        UserDtoResponse userDtoResponse = userService
+                .updateUser(userDto, id, userDto.getPositionId(), userDto.getCourseId());
 
         return new ResponseEntity<>(userDtoResponse, HttpStatus.OK);
     }
@@ -74,13 +74,57 @@ public class UserRestController {
 
     @GetMapping
     @ApiOperation("get all users")
-    public ResponseEntity<PagesDtoResponse<UserDtoResponse>> getAllPosition
+    public ResponseEntity<PagesDtoResponse<UserDtoResponse>> getAllUsers
             (@RequestParam(defaultValue = "5") int size,
              @RequestParam(defaultValue = "0") int page,
-             @RequestParam(required = false, defaultValue = "name") String name) {
+             @RequestParam(required = false, defaultValue = "name") String sort) {
 
-        PagesDtoResponse<UserDtoResponse> users = userService.getAll(size, page, name);
+        PagesDtoResponse<UserDtoResponse> users = userService.getAll(size, page, sort);
+
 
         return new ResponseEntity<>(users, HttpStatus.OK);
+    }
+
+    @GetMapping("/filter")
+    @ApiOperation("filter users")
+    public ResponseEntity<PagesDtoResponse<UserDtoResponse>> getUsersByFilter(
+            @RequestParam(required = false) String userName,
+            @RequestParam(required = false) String userLogin,
+            @RequestParam(required = false) String userLastName,
+            @RequestParam(required = false) String position,
+            @RequestParam(required = false) String course,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "name") String sort) {
+
+        PagesDtoResponse<UserDtoResponse> usersByFilter = userService.getUsersByFilter(
+                userName
+                , userLogin
+                , userLastName
+                , position
+                , course
+                , size, page, sort);
+
+        return new ResponseEntity<>(usersByFilter, HttpStatus.OK);
+    }
+
+    @GetMapping("/login")
+    @ApiOperation("Find user by login")
+    public ResponseEntity<UserDtoResponse> getUserByLogin(@RequestParam String login) {
+
+        UserDtoResponse byLogin = userService.findByLogin(login);
+
+        return new ResponseEntity<>(byLogin, HttpStatus.OK);
+    }
+
+    @GetMapping("/loginAndPassword")
+    @ApiOperation("Find user by login and password")
+    public ResponseEntity<UserDtoForAuthResponse> getUserByLoginAndPassword(@RequestParam String login,
+                                                                            @RequestParam String password) {
+
+        UserDtoForAuthResponse userByLoginAndPassword =
+                userService.findByLoginAndPassword(login, password);
+
+        return new ResponseEntity<>(userByLoginAndPassword, HttpStatus.OK);
     }
 }

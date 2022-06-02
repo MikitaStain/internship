@@ -63,7 +63,8 @@ public class CourseServiceImpl implements CourseService {
 
     private List<String> coursesName() {
 
-        return courseRepository.findAll().stream()
+        return courseRepository.findAll()
+                .stream()
                 .map(Course::getName)
                 .collect(Collectors.toList());
     }
@@ -71,13 +72,13 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public CourseDtoResponse updateCourse(CourseDto courseDto, Long id) {
 
+        validation.checkParameter(courseDto.getName());
+        validation.checkDuplicateParameter(coursesName(), courseDto.getName());
+
         Course courseById = getCourse(id);
-        Course course = courseMapper.toEntity(courseDto);
 
-        if (courseDto.getName().isBlank()) {
+        courseById.setName(courseDto.getName());
 
-            courseById.setName(course.getName());
-        }
         return courseMapper.toCourseResponseDto(courseRepository.save(courseById));
     }
 
@@ -87,15 +88,17 @@ public class CourseServiceImpl implements CourseService {
         courseRepository.delete(getCourse(id));
     }
 
+    @Override
     public Course getCourse(Long id) {
 
         return courseRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("course by id not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("course by id" + id + " not found"));
     }
 
 
     @Override
-    public PagesDtoResponse getAll(int size, int page, String sort) {
+    @Transactional(readOnly = true)
+    public PagesDtoResponse<CourseDtoResponse> getAll(int size, int page, String sort) {
 
         Page<CourseDtoResponse> allPositions = courseRepository
                 .findAll(pagesService.getPage(size, page, sort))

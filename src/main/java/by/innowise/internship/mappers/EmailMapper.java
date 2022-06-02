@@ -8,8 +8,6 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "spring")
 public interface EmailMapper {
 
-    EmailDto toEmailDto(Email email);
-
     Email toEntity(EmailDto emailDto);
 
     EmailDtoResponse toEmailResponseDto(Email email);

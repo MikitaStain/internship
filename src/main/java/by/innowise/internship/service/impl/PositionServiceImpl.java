@@ -73,25 +73,21 @@ public class PositionServiceImpl implements PositionService {
     @Override
     public PositionDtoResponse updatePosition(PositionDTO positionDTO, Long id) {
 
+        validation.checkParameter(positionDTO.getName());
+        validation.checkDuplicateParameter(positionsName(), positionDTO.getName());
+
         Position positionById = getPosition(id);
-        Position position = positionMapper.toPositionEntity(positionDTO);
 
-        if (!positionDTO.getName().isBlank()) {
-            positionById.setName(position.getName());
-        }
-
-        positionRepository.save(positionById);
+        positionById.setName(positionDTO.getName());
 
         return positionMapper
-                .toPositionResponseDto(positionById);
+                .toPositionResponseDto(positionRepository.save(positionById));
     }
 
     @Override
     public void deletePosition(Long id) {
 
-        Position position = getPosition(id);
-
-        positionRepository.delete(position);
+        positionRepository.delete(getPosition(id));
     }
 
     @Override
@@ -103,11 +99,13 @@ public class PositionServiceImpl implements PositionService {
 
 
     @Override
+    @Transactional(readOnly = true)
     public PagesDtoResponse<PositionDtoResponse> getAll(int size, int page, String sort) {
 
-        Page<PositionDtoResponse> allPositions = positionRepository
-                .findAll(pagesService.getPage(size, page, sort))
-                .map(positionMapper::toPositionResponseDto);
+        Page<PositionDtoResponse> allPositions =
+                positionRepository.findAll(
+                        pagesService.getPage(size, page, sort))
+                        .map(positionMapper::toPositionResponseDto);
 
         if (allPositions.isEmpty()) {
 

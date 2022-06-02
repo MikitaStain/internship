@@ -8,8 +8,6 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "spring")
 public interface PositionMapper {
 
-    PositionDTO toPositionDto(Position position);
-
     Position toPositionEntity(PositionDTO positionDTO);
 
     PositionDtoResponse toPositionResponseDto(Position position);

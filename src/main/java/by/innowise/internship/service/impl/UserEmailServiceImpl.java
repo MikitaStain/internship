@@ -8,27 +8,26 @@ import by.innowise.internship.exceptions.ResourceNotFoundException;
 import by.innowise.internship.mappers.EmailMapper;
 import by.innowise.internship.repository.dao.EmailRepository;
 import by.innowise.internship.service.UserEmailService;
-import by.innowise.internship.service.UserService;
+import by.innowise.internship.service.UserGlobalService;
 import by.innowise.internship.util.Validation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @Transactional
 public class UserEmailServiceImpl implements UserEmailService {
 
-    private final UserService userService;
+    private final UserGlobalService userService;
     private final EmailMapper emailMapper;
     private final EmailRepository emailRepository;
     private final Validation validation;
 
     @Autowired
-    public UserEmailServiceImpl(UserService userService,
+    public UserEmailServiceImpl(UserGlobalService userService,
                                 EmailMapper emailMapper,
                                 EmailRepository emailRepository,
                                 Validation validation) {
@@ -42,16 +41,12 @@ public class UserEmailServiceImpl implements UserEmailService {
     @Override
     public EmailDtoResponse addEmailForUser(Long userId, EmailDto emailDto) {
 
-
         validation.checkEmailValid(emailDto.getEmail());
         validation.checkDuplicateParameter(getEmailsForUser(userId), emailDto.getEmail());
 
         Email email = emailMapper.toEntity(emailDto);
 
         email.setUser(userService.getUser(userId));
-
-        Optional.of(emailMapper.toEntity(emailDto))
-                .ifPresent(email1 -> email.setUser(userService.getUser(userId)));
 
         return emailMapper.toEmailResponseDto(emailRepository.save(email));
     }
@@ -87,6 +82,7 @@ public class UserEmailServiceImpl implements UserEmailService {
     public EmailDtoResponse updateEmailForUser(Long userId, Long emailId, EmailDto emailDto) {
 
         validation.checkEmailValid(emailDto.getEmail());
+        validation.checkDuplicateParameter(getEmailsForUser(userId),emailDto.getEmail());
 
         return userService.getUser(userId)
                 .getEmails()
@@ -123,7 +119,7 @@ public class UserEmailServiceImpl implements UserEmailService {
 
             if (email.getId().equals(emailId)) {
 
-                emailRepository.delete(email);
+                emailRepository.deleteById(emailId);
 
                 return;
             }
