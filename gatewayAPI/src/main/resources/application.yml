@@ -14,3 +14,8 @@ spring:
 server:
   port: 8081
 
+jwt:
+  token:
+    secret: secretKey
+    expired: 3600000
+

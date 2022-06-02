@@ -10,16 +10,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 @RestController
@@ -44,21 +36,19 @@ public class UserRestController {
         this.restTemplate = restTemplate;
     }
 
-
     @GetMapping("/{id}")
     @ApiOperation("gateway method get for user")
-    public ResponseEntity<UserDtoResponse> getUser(@PathVariable("id") Long id) {
+    @PreAuthorize(value = "hasRole('ROLE_ADMIN') or #idUser.equals(authentication.principal.id)")
+    public ResponseEntity<UserDtoResponse> getUser(@PathVariable("id") Long idUser) {
 
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println(authentication.getName());
-        UserDtoResponse userDtoResponse = restTemplate.getForObject(USER_URL + id, UserDtoResponse.class);
+        UserDtoResponse userDtoResponse = restTemplate.getForObject(USER_URL + idUser, UserDtoResponse.class);
 
         return new ResponseEntity<>(userDtoResponse, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     @ApiOperation("gateway method delete for user")
+    @PreAuthorize(value = "hasRole('ROLE_ADMIN') or #id.equals(authentication.principal.id)")
     public ResponseEntity<HttpStatus> deleteUser(@PathVariable("id") Long id) {
 
         restTemplate.delete(USER_URL + id);
@@ -69,6 +59,7 @@ public class UserRestController {
 
     @PutMapping("/{id}")
     @ApiOperation("gateway update user")
+    @PreAuthorize(value = "hasRole('ROLE_ADMIN') or #id.equals(authentication.principal.id)")
     public ResponseEntity<UserDtoResponse> updateUser(@RequestBody UpdateUserDto updateUserDto,
                                                       @PathVariable("id") Long id) {
 
@@ -80,6 +71,7 @@ public class UserRestController {
 
     @GetMapping
     @ApiOperation("gateway get all users")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<PagesDtoResponse<UserDtoResponse>> getAllUsers
             (@RequestParam(defaultValue = "5") int size,
              @RequestParam(defaultValue = "0") int page,
@@ -97,9 +89,9 @@ public class UserRestController {
     }
 
 
-
     @GetMapping("/filter")
     @ApiOperation("gateway filter users")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<PagesDtoResponse<UserDtoResponse>> getUsersByFilter(
             @RequestParam(required = false) String userName,
             @RequestParam(required = false) String userLogin,

@@ -107,14 +107,14 @@ public class UserRestControllerReactive {
     @GetMapping("/filter")
     @ApiOperation("React filter users")
     public Mono<PagesDtoResponse<UserDtoResponse>> getUsersByFilter(
-            @RequestParam(required = false) String userName,
-            @RequestParam(required = false) String userLogin,
-            @RequestParam(required = false) String userLastName,
-            @RequestParam(required = false) String position,
-            @RequestParam(required = false) String course,
-            @RequestParam(defaultValue = "5") int size,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(required = false, defaultValue = "name") String sort) {
+            @RequestParam(name = "userName", required = false) String userName,
+            @RequestParam(name = "userLogin", required = false) String userLogin,
+            @RequestParam(name = "userLastName", required = false) String userLastName,
+            @RequestParam(name = "position", required = false) String position,
+            @RequestParam(name = "course", required = false) String course,
+            @RequestParam(name = "size", required = false, defaultValue = "5") int size,
+            @RequestParam(name = "page", required = false, defaultValue = "0") int page,
+            @RequestParam(name = "sort", required = false, defaultValue = "name") String sort) {
 
         return jsonPlaceHolderClient.getUsersByFilter(userName, userLogin, userLastName, position, course, size, page, sort)
                 .doOnSuccess(result -> logger.info("getUsersByFilter() Success"))
